@@ -28,6 +28,9 @@ auth:
   email-not-verified: "&eLogin successful, please remember to bind your email!"
   invalid-password: "&cIncorrect password! Did you perhaps forget?"
 
+chat:
+  password-blocked: "&cPlease don't tell others your password!"
+
 tab-complete:
   change-password:
     old: "<old password>"

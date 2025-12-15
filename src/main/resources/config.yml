@@ -39,6 +39,9 @@ authentication:
 
       perform-local-backup: true
 
+  client-mod:
+    enabled: true
+
 log:
   pre-login: false
   join-limbo: false

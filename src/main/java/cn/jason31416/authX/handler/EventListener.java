@@ -10,8 +10,11 @@ import cn.jason31416.authX.util.Logger;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
+import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.player.GameProfileRequestEvent;
+import com.velocitypowered.api.event.player.PlayerChatEvent;
+import com.velocitypowered.api.event.player.ServerLoginPluginMessageEvent;
 import com.velocitypowered.api.util.GameProfile;
 import com.velocitypowered.api.util.UuidUtils;
 import com.velocitypowered.proxy.connection.MinecraftConnection;
@@ -141,6 +144,17 @@ public class EventListener {
                 Logger.info("Player "+event.getPlayer().getUsername()+" is authenticating via password.");
             LimboHandler.spawnPlayer(event.getPlayer());
         });
+    }
+
+    @Subscribe(
+            order = PostOrder.FIRST
+    )
+    public void onPlayerChat(PlayerChatEvent event){
+        String msg = event.getMessage();
+        if(msg!=null&&msg.equals(LoginSession.getSession(event.getPlayer().getUsername()).getPassword())){
+            event.setResult(PlayerChatEvent.ChatResult.denied());
+            event.getPlayer().sendMessage(Message.getMessage("chat.password-blocked").toComponent());
+        }
     }
 
     @Subscribe

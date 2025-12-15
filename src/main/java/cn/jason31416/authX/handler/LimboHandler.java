@@ -6,6 +6,7 @@ import cn.jason31416.authX.message.Message;
 import cn.jason31416.authX.util.Config;
 import cn.jason31416.authX.util.Logger;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.proxy.protocol.packet.PluginMessagePacket;
 import net.elytrium.limboapi.api.Limbo;
 import net.elytrium.limboapi.api.LimboSessionHandler;
 import net.elytrium.limboapi.api.player.LimboPlayer;
@@ -72,6 +73,24 @@ public class LimboHandler implements LimboSessionHandler {
 
     public static void spawnPlayer(@Nonnull Player player) {
         limboWorld.spawnPlayer(player, new LimboHandler(player));
+    }
+
+    @Override
+    public void onGeneric(Object obj){
+        if(!Config.getBoolean("authentication.client-mod.enabled")) return;
+
+        // Handles client mod authentication
+
+        if(obj instanceof PluginMessagePacket packet){
+            Logger.info("Received plugin message from channel: "+packet.getChannel());
+            String channel = packet.getChannel();
+
+            if (channel.equals("MC|Brand") || channel.equals("minecraft:brand")) {
+                player.sendPluginMessage(ModProtocolHandler.getChannelIdentifier(), new byte[0]);
+            } else if (channel.equals(ModProtocolHandler.getChannelIdentifier().getId())) {
+                Logger.info("Received authentication request from client mod! Yay!");
+            }
+        }
     }
 
     @Override

@@ -30,7 +30,7 @@ public class DatabaseHandler {
         dataSource = new HikariDataSource(otherConfig);
 
         try (Connection connection = getConnection()) {
-            connection.prepareStatement("CREATE TABLE IF NOT EXISTS authmethods (username VARCHAR(255) PRIMARY KEY, verified VARCHAR(255), preferred VARCHAR(255))").execute();
+            connection.prepareStatement("CREATE TABLE IF NOT EXISTS authmethods (username VARCHAR(255) PRIMARY KEY, verified VARCHAR(255), preferred VARCHAR(255), modkey VARCHAR(255) default NULL)").execute();
             connection.prepareStatement("CREATE TABLE IF NOT EXISTS uuiddata (username VARCHAR(255) PRIMARY KEY, uuid VARCHAR(255))").execute();
             connection.prepareStatement("CREATE TABLE IF NOT EXISTS passwordbackup (username VARCHAR(255) PRIMARY KEY, password VARCHAR(255), pubkeyhash VARCHAR(10))").execute();
         }
@@ -55,6 +55,29 @@ public class DatabaseHandler {
                 return UUID.fromString(rs.getString("uuid"));
             } else {
                 return UuidUtils.generateOfflinePlayerUuid(username);
+            }
+        }
+    }
+
+    @SneakyThrows
+    public static void setModKey(String username, String modkey){
+        try (Connection connection = getConnection()) {
+            var st = connection.prepareStatement("UPDATE authmethods SET modkey =? WHERE username =?");
+            st.setString(1, modkey);
+            st.setString(2, username);
+            st.execute();
+        }
+    }
+    @SneakyThrows @Nullable
+    public static String getModKey(String username) {
+        try (Connection connection = getConnection()) {
+            var st = connection.prepareStatement("SELECT modkey FROM authmethods WHERE username =?");
+            st.setString(1, username);
+            var rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getString("modkey");
+            } else {
+                return null;
             }
         }
     }

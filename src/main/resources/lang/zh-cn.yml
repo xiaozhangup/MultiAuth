@@ -28,6 +28,8 @@ auth:
   email-not-verified: "&e登录成功，请记得绑定邮箱哦~"
   invalid-password: "&c密码错误! 是不是记错了呢~"
 
+chat:
+  password-blocked: "&c请不要将自己的密码告诉别人哦!"
 
 tab-complete:
   change-password:
