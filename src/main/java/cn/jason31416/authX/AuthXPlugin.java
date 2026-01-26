@@ -13,6 +13,7 @@ import cn.jason31416.authX.injection.XLoginSessionHandler;
 import cn.jason31416.authX.message.MessageLoader;
 import cn.jason31416.authX.util.Config;
 import com.google.inject.Inject;
+import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.plugin.Dependency;
@@ -26,6 +27,7 @@ import lombok.SneakyThrows;
 import net.elytrium.limboapi.api.LimboFactory;
 import net.elytrium.limboapi.api.chunk.Dimension;
 import net.elytrium.limboapi.api.chunk.VirtualWorld;
+import net.elytrium.limboapi.api.command.LimboCommandMeta;
 import net.elytrium.limboapi.api.file.BuiltInWorldFileType;
 import net.elytrium.limboapi.api.file.WorldFile;
 import net.elytrium.limboapi.api.player.GameMode;
@@ -35,11 +37,12 @@ import javax.annotation.Nonnull;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-@Plugin(id = "authx", name = "AuthX", version = "2.2", authors = {"Jason31416", "oneLiLi"}, dependencies = {@Dependency(id = "limboapi", optional = false)})
+@Plugin(id = "authx", name = "AuthX", version = "2.1.4", authors = {"Jason31416", "oneLiLi"}, dependencies = {@Dependency(id = "limboapi", optional = false)})
 public class AuthXPlugin {
     @Getter
     public static AuthXPlugin instance;
