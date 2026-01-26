@@ -40,13 +40,13 @@ jobs:
       if: ${{ github.event_name == 'push' }}
       id: find-jar
       run: |
-        output="$(find plugin/core/target/ -name "AuthX-*.jar" -type f -printf "%f\n")"
+        output="$(find /home/runner/work/AuthX/AuthX/core/target/ -name "AuthX-*.jar" -type f -printf "%f\n")"
         echo "::set-output name=jarname::$output"
     - name: Release the build
       if: ${{ github.event_name == 'push' }}
       uses: ncipollo/release-action@v1
       with:
-        artifacts: plugin/core/target/${{ steps.find-jar.outputs.jarname }},
+        artifacts: /home/runner/work/AuthX/AuthX/core/target/${{ steps.find-jar.outputs.jarname }},
         body: ${{ join(github.event.commits.*.message, '\n') }}
         prerelease: true
         name: Dev-build ${{ steps.git-version.outputs.id }}
@@ -56,7 +56,7 @@ jobs:
       uses: RubixDev/modrinth-upload@v1.0.0
       with:
         token: ${{ secrets.MODRINTH_TOKEN }}
-        file_path: plugin/core/target/${{ steps.find-jar.outputs.jarname }}
+        file_path: /home/runner/work/AuthX/AuthX/core/target/${{ steps.find-jar.outputs.jarname }}
         name: Dev-build ${{ steps.git-version.outputs.id }}
         version: ${{ steps.git-version.outputs.id }}
         changelog: ${{ join(github.event.commits.*.message, '\n') }}
