@@ -115,8 +115,8 @@ public class EventListener {
                 if (!connection.isClosed()) {
                     pendingLogins.add(username);
                     connection.getChannel().closeFuture().addListener(future -> {
-                        if(pendingLogins.remove(username)){
-                            loginPremiumFailedCache.put(event.getUniqueId(), System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10));
+                        if(pendingLogins.remove(username) && Config.getBoolean("authentication.enable-fail-cache")){
+                            loginPremiumFailedCache.put(event.getUniqueId(), System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1));
                         }
                     });
                 }

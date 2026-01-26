@@ -13,6 +13,8 @@ authentication:
   # ONLY CHOOSE REQUEST/AUTO IF YOU ARE FACING CASES WHERE UUID DOESN'T WORK!
   filter-method: UUID
 
+  enable-fail-cache: true
+
   yggdrasil:
     # If true, the plugin will verify the player's IP address when authenticating with Yggdrasil. Make sure that either there are no proxy before velocity or HAProxy is on.
     verify-ip: true
@@ -38,9 +40,6 @@ authentication:
       api-key: ""
 
       perform-local-backup: true
-
-  client-mod:
-    enabled: true
 
 log:
   pre-login: false
