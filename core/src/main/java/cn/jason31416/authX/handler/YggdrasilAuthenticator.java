@@ -67,9 +67,9 @@ public class YggdrasilAuthenticator {
                 ret.authentication = authMethod;
                 var session = LoginSession.getSession(username);
                 DatabaseHandler.getInstance().setPreferred(username, authMethod);
+                session.setAuthMethod(authMethod);
                 if(!DatabaseHandler.getInstance().getAuthMethods(username).contains(authMethod)){
                     session.setVerifyPassword(true);
-                    session.setAuthMethod(authMethod);
                     session.setPasswordIntroMessage(Message.getMessage("auth.yggdrasil-new-need-verification").add("auth_method", authMethod));
                 }
                 future.complete(ret);

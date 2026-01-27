@@ -64,6 +64,8 @@ public class LimboHandler implements LimboSessionHandler {
         if(session == null) return;
         if(session.getAuthMethod()!=null&&!session.getAuthMethod().isEmpty()){
             DatabaseHandler.getInstance().addAuthMethod(player.getUsername(), session.getAuthMethod());
+        }else{
+            session.setAuthMethod("offline");
         }
     }
 

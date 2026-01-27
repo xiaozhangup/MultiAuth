@@ -41,6 +41,11 @@ authentication:
 
       perform-local-backup: true
 
+prefix: # Used for placeholder/TAB integration. Use %authx-auth-tag% in TAB to display.
+  offline: "&7Offline"
+  mojang: "&aOnline"
+  littleskin: "&eLittleskin"
+
 log:
   pre-login: false
   join-limbo: false

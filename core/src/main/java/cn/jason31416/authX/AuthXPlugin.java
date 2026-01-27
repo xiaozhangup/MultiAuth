@@ -1,5 +1,6 @@
 package cn.jason31416.authX;
 
+import cn.jason31416.authX.hook.TABHandler;
 import cn.jason31416.authx.api.AbstractAuthenticator;
 import cn.jason31416.authX.authbackend.LocalAuthenticator;
 import cn.jason31416.authX.authbackend.UniauthAuthenticator;
@@ -42,7 +43,12 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-@Plugin(id = "authx", name = "AuthX", version = "2.1.4", authors = {"Jason31416", "oneLiLi"}, dependencies = {@Dependency(id = "limboapi", optional = false)})
+@Plugin(id = "authx", name = "AuthX", version = "2.1.4", authors = {"Jason31416", "oneLiLi"},
+        dependencies = {
+                @Dependency(id = "limboapi", optional = false),
+                @Dependency(id = "floodgate", optional = true),
+                @Dependency(id = "tab", optional = true)
+        })
 public class AuthXPlugin implements AuthXApi {
     @Getter
     public static AuthXPlugin instance;
@@ -141,6 +147,11 @@ public class AuthXPlugin implements AuthXApi {
         }
 
         PacketInjector.inject();
+
+        if(getProxy().getPluginManager().isLoaded("tab")){
+            TABHandler.registerPlaceholder();
+        }
+
         logger.info("AuthX has been enabled!");
     }
 
