@@ -32,7 +32,17 @@ authentication:
     auth-time: 180 # seconds
     attempt-count: 3
 
-    method: SQLITE # SQLITE, UNIAUTH
+    method: SQLITE # SQLITE, MYSQL, UNIAUTH
+
+    mysql:
+      host: "localhost"
+      port: 3306
+      database: "authx"
+      username: "root"
+      password: ""
+      # Typical recommended value:
+      # "useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+      parameters: ""
 
     # If you don't know what is this or don't have an uniauth provider, please don't try it and use SQLITE instead.
     uniauth:

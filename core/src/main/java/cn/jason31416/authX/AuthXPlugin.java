@@ -98,7 +98,8 @@ public class AuthXPlugin implements AuthXApi {
         AbstractAuthenticator.instance = switch(Config.getString("authentication.password.method").toLowerCase(Locale.ROOT)){
             case "uniauth" -> new UniauthAuthenticator();
             case "sqlite" -> new LocalAuthenticator();
-            default -> throw new IllegalArgumentException("Invalid API source: "+Config.getString("authentication.password.uniauth"));
+            case "mysql" -> new LocalAuthenticator();
+            default -> throw new IllegalArgumentException("Invalid authentication.password.method: " + Config.getString("authentication.password.method"));
         };
         AbstractAuthenticator.getInstance().initialize();
     }
