@@ -6,7 +6,7 @@
 
     <groupId>cn.jason31416</groupId>
     <artifactId>authx</artifactId>
-    <version>2.2</version>
+    <version>2.2.1</version>
     <packaging>pom</packaging>
 
     <name>AuthX</name>

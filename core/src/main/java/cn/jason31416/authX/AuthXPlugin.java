@@ -2,7 +2,6 @@ package cn.jason31416.authX;
 
 import cn.jason31416.authX.handler.LoginSession;
 import cn.jason31416.authX.hook.TABHandler;
-import cn.jason31416.authX.injection.XLoginSessionHandlerOld;
 import cn.jason31416.authx.api.*;
 import cn.jason31416.authX.authbackend.LocalAuthenticator;
 import cn.jason31416.authX.authbackend.UniauthAuthenticator;

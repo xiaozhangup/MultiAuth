@@ -6,7 +6,7 @@
     <parent>
         <groupId>cn.jason31416</groupId>
         <artifactId>authx</artifactId>
-        <version>2.2</version>
+        <version>2.2.1</version>
     </parent>
 
     <artifactId>core</artifactId>
@@ -215,7 +215,7 @@
         <dependency>
             <groupId>cn.jason31416</groupId>
             <artifactId>api</artifactId>
-            <version>2.2</version>
+            <version>2.2.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.NEZNAMY</groupId>
