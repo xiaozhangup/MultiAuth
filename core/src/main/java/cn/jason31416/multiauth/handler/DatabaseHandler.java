@@ -36,7 +36,7 @@ public class DatabaseHandler implements IDatabaseHandler {
 
         try (Connection connection = getConnection()) {
             connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_AUTH_METHODS + " (username VARCHAR(255) PRIMARY KEY, verified VARCHAR(255), preferred VARCHAR(255), modkey VARCHAR(255) default NULL)").execute();
-            connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_UUID_DATA + " (username VARCHAR(255) PRIMARY KEY, uuid VARCHAR(255))").execute();
+            connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_UUID_DATA + " (uuid VARCHAR(255) PRIMARY KEY, username VARCHAR(255))").execute();
         }
     }
 
@@ -69,26 +69,83 @@ public class DatabaseHandler implements IDatabaseHandler {
     @Override
     public void setUUID(String username, UUID uuid){
         try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement("INSERT INTO " + TABLE_UUID_DATA + " (username, uuid) VALUES (?,?) ON DUPLICATE KEY UPDATE uuid = ?");
-            st.setString(1, username);
-            st.setString(2, uuid.toString());
-            st.setString(3, uuid.toString());
+            var st = connection.prepareStatement(
+                    "INSERT INTO " + TABLE_UUID_DATA + " (uuid, username) VALUES (?,?) " +
+                    "ON DUPLICATE KEY UPDATE username = ?");
+            st.setString(1, uuid.toString());
+            st.setString(2, username);
+            st.setString(3, username);
             st.execute();
         }
     }
+
     @SneakyThrows
     @Override
     public UUID getUUID(String username) {
+        UUID result = getUUIDByUsername(username);
+        return result != null ? result : UuidUtils.generateOfflinePlayerUuid(username);
+    }
+
+    @SneakyThrows
+    @Override
+    @Nullable
+    public UUID getUUIDByUsername(String username) {
         try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement("SELECT uuid FROM " + TABLE_UUID_DATA + " WHERE username =?");
+            var st = connection.prepareStatement(
+                    "SELECT uuid FROM " + TABLE_UUID_DATA + " WHERE username = ?");
             st.setString(1, username);
             var rs = st.executeQuery();
             if (rs.next()) {
                 return UUID.fromString(rs.getString("uuid"));
-            } else {
-                return UuidUtils.generateOfflinePlayerUuid(username);
             }
+            return null;
         }
+    }
+
+    @SneakyThrows
+    @Override
+    @Nullable
+    public String getUsernameByUUID(UUID uuid) {
+        try (Connection connection = getConnection()) {
+            var st = connection.prepareStatement(
+                    "SELECT username FROM " + TABLE_UUID_DATA + " WHERE uuid = ?");
+            st.setString(1, uuid.toString());
+            var rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getString("username");
+            }
+            return null;
+        }
+    }
+
+    @Override
+    public String resolveAndPersistUUID(UUID uuid, String yggdrasilName) {
+        String storedName = getUsernameByUUID(uuid);
+
+        if (storedName != null && storedName.equals(yggdrasilName)) {
+            // UUID already mapped to this exact username — nothing to do.
+            return storedName;
+        }
+
+        // Either it's a new player, or the Yggdrasil name has changed.
+        // Check whether the desired name is already occupied by a *different* UUID.
+        UUID existingUuidForName = getUUIDByUsername(yggdrasilName);
+        String effectiveName;
+        if (existingUuidForName != null && !existingUuidForName.equals(uuid)) {
+            if (storedName != null) {
+                // Name change requested but new name is taken — keep the current stored name.
+                effectiveName = storedName;
+            } else {
+                // New player whose desired name is taken — append suffix to avoid conflict.
+                effectiveName = yggdrasilName + "1";
+            }
+        } else {
+            // Name is available (or belongs to this UUID already).
+            effectiveName = yggdrasilName;
+        }
+
+        setUUID(effectiveName, uuid);
+        return effectiveName;
     }
 
     @SneakyThrows

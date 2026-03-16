@@ -67,12 +67,18 @@ public class EventListener {
 
         UUID authenticatedUuid = event.getOriginalProfile().getId();
         if (authenticatedUuid != null) {
+            // Online / Yggdrasil-authenticated player.
+            // Resolve the effective username: respects UUID-based identity (name changes)
+            // and appends "1" when a different player already owns the desired name.
+            String yggdrasilName = event.getOriginalProfile().getName();
+            String effectiveName;
             try {
-                DatabaseHandler.getInstance().setUUID(event.getUsername(), authenticatedUuid);
+                effectiveName = DatabaseHandler.getInstance().resolveAndPersistUUID(authenticatedUuid, yggdrasilName);
             } catch (Exception e) {
-                Logger.warn("Failed to persist authenticated UUID for " + event.getUsername() + ": " + e.getMessage());
+                Logger.warn("Failed to resolve/persist UUID for " + yggdrasilName + ": " + e.getMessage());
+                effectiveName = yggdrasilName;
             }
-            event.setGameProfile(event.getOriginalProfile().withId(authenticatedUuid));
+            event.setGameProfile(new GameProfile(authenticatedUuid, effectiveName, event.getOriginalProfile().getProperties()));
             return;
         }
 
