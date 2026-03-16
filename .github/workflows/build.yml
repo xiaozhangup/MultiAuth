@@ -1,5 +1,5 @@
 # Thanks for Elytrium/LimboAPI for some of the workflow file :D
-name: AuthX Build
+name: MultiAuth Build
 
 on:
   push:
@@ -18,14 +18,18 @@ jobs:
       with:
         java-version: '21'
         distribution: 'zulu'
-        cache: maven
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
-    - name: Upload AuthX
+        cache: gradle
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build with Gradle
+      run: ./gradlew shadowJar :api:jar --no-daemon
+    - name: Upload MultiAuth
       uses: actions/upload-artifact@v4.6.2
       with:
-        name: AuthX
-        path: "*/target/AuthX-*.jar"
+        name: MultiAuth
+        path: |
+          core/build/libs/MultiAuth-*.jar
+          api/build/libs/MultiAuth-*-Api.jar
     - uses: dev-drprasad/delete-tag-and-release@v0.2.1
       if: ${{ github.event_name == 'push' }}
       with:
@@ -40,20 +44,21 @@ jobs:
       if: ${{ github.event_name == 'push' }}
       id: find-jar
       run: |
-        output="$(find /home/runner/work/AuthX/AuthX/core/target/ -name "AuthX-*.jar" -type f -printf "%f\n")"
-        echo "::set-output name=jarname::$output"
+        output="$(find core/build/libs/ -name "MultiAuth-*.jar" ! -name "*-Api.jar" -type f -printf "%f\n")"
+        echo "jarname=$output" >> $GITHUB_OUTPUT
     - name: Find the correct api JAR
       if: ${{ github.event_name == 'push' }}
       id: find-jar-api
       run: |
-        output="$(find /home/runner/work/AuthX/AuthX/api/target/ -name "AuthX-*-Api.jar" -type f -printf "%f\n")"
-        echo "::set-output name=jarname::$output"
+        output="$(find api/build/libs/ -name "MultiAuth-*-Api.jar" -type f -printf "%f\n")"
+        echo "jarname=$output" >> $GITHUB_OUTPUT
     - name: Release the build
       if: ${{ github.event_name == 'push' }}
       uses: ncipollo/release-action@v1
       with:
-        artifacts: /home/runner/work/AuthX/AuthX/core/target/${{ steps.find-jar.outputs.jarname }},/home/runner/work/AuthX/AuthX/api/target/${{ steps.find-jar-api.outputs.jarname }}
+        artifacts: core/build/libs/${{ steps.find-jar.outputs.jarname }},api/build/libs/${{ steps.find-jar-api.outputs.jarname }}
         body: ${{ join(github.event.commits.*.message, '\n') }}
         prerelease: true
         name: Dev-build ${{ steps.git-version.outputs.id }}
         tag: dev-build
+
