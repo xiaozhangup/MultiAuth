@@ -1,5 +1,6 @@
 plugins {
     base
+    kotlin("jvm") version "2.1.20" apply false
 }
 
 allprojects {
@@ -9,6 +10,7 @@ allprojects {
 
 subprojects {
     apply(plugin = "java")
+    apply(plugin = "org.jetbrains.kotlin.jvm")
 
     configure<JavaPluginExtension> {
         sourceCompatibility = JavaVersion.VERSION_21
