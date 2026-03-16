@@ -84,6 +84,12 @@ public class EventListener {
             LoginSession session = new LoginSession(username, uuid);
             LoginSession.getSessionMap().put(username, session);
 
+            try {
+                DatabaseHandler.getInstance().setUUID(username, uuid);
+            } catch (Exception e) {
+                Logger.warn("Failed to persist UUID for " + username + ": " + e.getMessage());
+            }
+
             if (MultiAuth.getInstance().getProxy().getPluginManager().isLoaded("floodgate") && FloodgateHandler.isFloodgatePlayer(event.getUniqueId())) {
                 return;
             }
