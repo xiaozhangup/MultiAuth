@@ -5,64 +5,24 @@ auth:
 
   failed-to-login: "<red>登录验证系统出错，请联系管理员!"
 
-  user-input: "<gray>> %input%"
-
-  failed-to-connect-to-backend: "<red>无法连接到后端服务器! 请稍后再试"
-  timeout: "<red>登录超时! 请重新进入服务器哦"
-
-  yggdrasil-new-need-verification: "<green>这是你第一次使用 %auth_method% 进入服务器，需要进行密码验证来确保你的安全！"
-
-  auth-bar-name: "<white>剩余 %time% 秒"
-
-  message-hint:
-    unknown: "<gray>加载中..."
-    login: "<aqua>请在聊天栏中输入您的 <yellow>密码 <aqua>进行登录!"
-    register_password: "<aqua>请在聊天栏中输入一个 <yellow>密码 <aqua>进行注册!"
-    register_confirm_password: "<aqua>请再次输入您的密码! <gray>('back'返回上一步)"
-
-  register-success: "<green>注册成功! 欢迎来到服务器awa"
-  passwords-dont-match: "<red>两次输入的密码不匹配! 请仔细检查哦"
-  password-doesnt-match-regex: "<red>密码不符合要求! 换个安全又好记的密码吧~"
-
-  login-success: "<green>登录成功! 欢迎回来~"
-  max-attempts: "<red>登录尝试次数过多! 请稍后再试"
-  email-not-verified: "<yellow>登录成功，请记得绑定邮箱哦~"
-  invalid-password: "<red>密码错误! 是不是记错了呢~"
-
-chat:
-  password-blocked: "<red>请不要将自己的密码告诉别人哦!"
-
 tab-complete:
-  change-password:
-    old: "<旧密码>"
-    new: "<新密码>"
+  force-unregister:
+    player: "<玩家>"
   force-change-password:
     player: "<玩家>"
-    new: "<新密码>"
   set-uuid:
     player: "<玩家>"
     uuid: "[UUID]"
 
 command:
-  player-command: "<red>该命令为玩家命令，不可在控制台执行!"
   default: "<red>未知的子命令!"
   no-permission: "<red>你没有权限执行该命令!"
 
   player-not-exists: "<red>玩家 %player% 不存在!"
 
-  change-password:
-    success: "<green>成功修改了密码! 请一定要牢牢记住哦!"
-    invalid-format-need-old-password: "<red>错误的格式! 请使用 <yellow>/account changepass <旧密码> <新密码>"
-    invalid-format-no-old-password: "<red>错误的格式! 请使用 <yellow>/account changepass <新密码>"
-    invalid-password: "<red>错误的密码! 是不是记错了呢~"
-    invalid-password-format: "<red>密码不符合要求! 换个安全又好记的密码吧~"
-
-  force-change-password:
-    success: "<green>成功修改了 %player% 的密码!"
-    invalid-format: "<red>错误的格式! 请使用 <yellow>/authx changepass <玩家用户名> <新密码>"
-
   force-unregister:
     invalid-format: "<red>错误的格式! 请使用 <yellow>/authx unregister <玩家用户名>"
+    success: "<green>成功注销了 %player% !"
 
   reload:
     success: "<green>成功重载了 <aqua>AuthX <green>!"
@@ -71,7 +31,3 @@ command:
     invalid-format: "<red>错误的格式! 请使用 <yellow>/authx setuuid <玩家用户名> [UUID]"
     success: "<green>成功将 %player% 的 UUID 设置为 %uuid% !"
     invalid-uuid: "<red>无效的 UUID 格式! 请检查 UUID 是否正确!"
-
-  recover:
-    failed: "<red>尝试恢复密码时遇到错误：%reason%"
-    success: "<green>成功从备份恢复了 %count% 名玩家的密码!"

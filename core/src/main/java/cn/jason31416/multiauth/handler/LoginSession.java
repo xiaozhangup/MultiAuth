@@ -1,6 +1,5 @@
 package cn.jason31416.multiauth.handler;
 
-import cn.jason31416.multiauth.message.Message;
 import cn.jason31416.multiauth.util.Logger;
 import cn.jason31416.multiauth.api.ILoginSession;
 import com.velocitypowered.api.util.UuidUtils;
@@ -20,17 +19,7 @@ public class LoginSession implements ILoginSession {
     private UUID uuid;
 
     @Setter
-    private boolean enforcePrimaryMethod = false;
-    @Setter
-    private boolean verifyPassword = true;
-    @Setter
     private String authMethod = null;
-
-    @Setter
-    private String password = null;
-
-    @Setter
-    private Message passwordIntroMessage = null;
 
     public LoginSession(String username, UUID uuid) {
         this.username = username;

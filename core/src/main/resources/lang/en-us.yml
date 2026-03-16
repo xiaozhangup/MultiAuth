@@ -5,64 +5,24 @@ auth:
 
   failed-to-login: "<red>Login verification system error, please contact an administrator!"
 
-  user-input: "<gray>> %input%"
-
-  failed-to-connect-to-backend: "<red>Unable to connect to the backend server! Please try again later."
-  timeout: "<red>Login timed out! Please rejoin the server."
-
-  yggdrasil-new-need-verification: "<green>This is your first time joining the server with %auth_method%, a password verification is required to ensure your security!"
-
-  auth-bar-name: "<white>%time% seconds remaining"
-
-  message-hint:
-    unknown: "<gray>Loading..."
-    login: "<aqua>Please type your <yellow>password <aqua>in chat to log in!"
-    register_password: "<aqua>Please type a <yellow>password <aqua>in chat to register!"
-    register_confirm_password: "<aqua>Please re-enter your password! <gray>('back' to go back)"
-
-  register-success: "<green>Registration successful! Welcome to the server!"
-  passwords-dont-match: "<red>The passwords you entered do not match! Please double-check."
-  password-doesnt-match-regex: "<red>Password does not meet the requirements! Please choose a secure and memorable password."
-
-  login-success: "<green>Login successful! Welcome back~"
-  max-attempts: "<red>Too many login attempts! Please try again later."
-  email-not-verified: "<yellow>Login successful, please remember to bind your email!"
-  invalid-password: "<red>Incorrect password! Did you perhaps forget?"
-
-chat:
-  password-blocked: "<red>Please don't tell others your password!"
-
 tab-complete:
-  change-password:
-    old: "<old password>"
-    new: "<new password>"
+  force-unregister:
+    player: "<player>"
   force-change-password:
     player: "<player>"
-    new: "<new password>"
   set-uuid:
     player: "<player>"
     uuid: "[UUID]"
 
 command:
-  player-command: "<red>This command is for players only and cannot be executed from the console!"
   default: "<red>Unknown subcommand!"
   no-permission: "<red>You do not have permission to execute this command!"
 
   player-not-exists: "<red>The player %player% does not exist!"
 
-  change-password:
-    success: "<green>Password changed successfully! Please be sure to remember it!"
-    invalid-format-need-old-password: "<red>Incorrect format! Use <yellow>/account changepass <old password> <new password>"
-    invalid-format-no-old-password: "<red>Incorrect format! Use <yellow>/account changepass <new password>"
-    invalid-password: "<red>Incorrect password! Did you perhaps forget?"
-    invalid-password-format: "<red>Password does not meet the requirements! Please choose a secure and memorable password."
-
-  force-change-password:
-    success: "<green>Successfully changed %player%'s password!"
-    invalid-format: "<red>Incorrect format! Use <yellow>/authx changepass <player username> <new password>"
-
   force-unregister:
     invalid-format: "<red>Incorrect format! Use <yellow>/authx unregister <player username>"
+    success: "<green>Successfully unregistered %player%!"
 
   reload:
     success: "<green>Successfully reloaded <aqua>AuthX<green>!"

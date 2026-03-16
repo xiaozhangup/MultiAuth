@@ -1,8 +1,6 @@
 package cn.jason31416.multiauth.command;
 
 import cn.jason31416.multiauth.MultiAuth;
-import cn.jason31416.multiauth.api.AbstractAuthenticator;
-import cn.jason31416.multiauth.authbackend.UniauthAuthenticator;
 import cn.jason31416.multiauth.handler.DatabaseHandler;
 import cn.jason31416.multiauth.handler.EventListener;
 import cn.jason31416.multiauth.message.Message;
@@ -31,47 +29,18 @@ public class AdminCommandHandler implements SimpleCommand {
             return;
         }
         switch (subCommand){
-            case "changepass" -> {
-                if(invocation.arguments().length<3){
-                    invocation.source().sendMessage(Message.getMessage("command.force-change-password.invalid-format").toComponent());
-                    return;
-                }
-                String newPassword = invocation.arguments()[2], username = invocation.arguments()[1];
-                if(AbstractAuthenticator.getInstance().fetchStatus(username) == AbstractAuthenticator.UserStatus.NOT_EXIST){
-                    invocation.source().sendMessage(Message.getMessage("command.player-not-exists").add("player", username).toComponent());
-                    return;
-                }
-                AbstractAuthenticator.getInstance().changePassword(username, newPassword);
-                invocation.source().sendMessage(Message.getMessage("command.force-change-password.success").add("player", username).toComponent());
-            }
             case "unregister" -> {
                 if(invocation.arguments().length<2){
                     invocation.source().sendMessage(Message.getMessage("command.force-unregister.invalid-format").toComponent());
                     return;
                 }
                 String username = invocation.arguments()[1];
-                if(AbstractAuthenticator.getInstance().fetchStatus(username) == AbstractAuthenticator.UserStatus.NOT_EXIST){
-                    invocation.source().sendMessage(Message.getMessage("command.player-not-exists").add("player", username).toComponent());
-                    return;
-                }
-                if(AbstractAuthenticator.getInstance() instanceof UniauthAuthenticator){
-                    invocation.source().sendMessage(new Message("<red>Uniauth does not support unregistering users!").toComponent());
-                    return;
-                }
-                AbstractAuthenticator.getInstance().unregister(username);
-                invocation.source().sendMessage(Message.getMessage("command.change-password.success").toComponent());
+                DatabaseHandler.getInstance().setUUID(username, null);
+                invocation.source().sendMessage(Message.getMessage("command.force-unregister.success").add("player", username).toComponent());
             }
             case "reload" -> {
                 MultiAuth.instance.init();
                 invocation.source().sendMessage(Message.getMessage("command.reload.success").toComponent());
-            }
-            case "recover" -> {
-                try{
-                    int cnt = UniauthAuthenticator.attemptRecovery();
-                    invocation.source().sendMessage(Message.getMessage("command.recover.success").add("count", cnt).toComponent());
-                }catch (Exception e){
-                    invocation.source().sendMessage(Message.getMessage("command.recover.failed").add("reason", e.getMessage()).toComponent());
-                }
             }
             case "setuuid" -> {
                 if(invocation.arguments().length<2){
@@ -93,10 +62,6 @@ public class AdminCommandHandler implements SimpleCommand {
                 DatabaseHandler.getInstance().setUUID(username, uuid);
                 invocation.source().sendMessage(Message.getMessage("command.set-uuid.success").add("player", username).add("uuid", uuid.toString()).toComponent());
             }
-            case "clearcache" -> {
-                EventListener.loginPremiumFailedCache.clear();
-                invocation.source().sendMessage(new Message("<green>Cleared user authentication cache!").toComponent());
-            }
             case "" -> {
                 invocation.source().sendMessage(new Message("<green>Running <aqua><bold>AuthX v2</bold></aqua> by Jason31416!").toComponent());
             }
@@ -108,17 +73,15 @@ public class AdminCommandHandler implements SimpleCommand {
     @Override
     public List<String> suggest(final @Nonnull Invocation invocation) {
         if(invocation.arguments().length<=1)
-            return List.of("changepass", "unregister", "reload", "setuuid", "clearcache");
+            return List.of("unregister", "reload", "setuuid");
         else if(invocation.arguments().length == 2){
             return switch (invocation.arguments()[0]){
-                case "changepass" -> List.of(Message.getMessage("tab-complete.force-change-password.player").toString());
-                case "unregister" -> List.of(Message.getMessage("command.force-change-password.new").toString());
+                case "unregister" -> List.of(Message.getMessage("tab-complete.force-unregister.player").toString());
                 case "setuuid" -> List.of(Message.getMessage("tab-complete.set-uuid.player").toString());
                 default -> List.of();
             };
         }else if(invocation.arguments().length == 3){
             return switch (invocation.arguments()[0]){
-                case "changepass" -> List.of(Message.getMessage("command.force-change-password.new").toString());
                 case "setuuid" -> List.of(Message.getMessage("tab-complete.set-uuid.uuid").toString());
                 default -> List.of();
             };

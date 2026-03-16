@@ -21,13 +21,11 @@ dependencies {
     annotationProcessor("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
 
     implementation("com.zaxxer:HikariCP:5.1.0")
-    implementation("at.favre.lib:bcrypt:0.9.0")
     implementation("mysql:mysql-connector-java:8.0.23")
 
     compileOnly("org.projectlombok:lombok:1.18.38")
     annotationProcessor("org.projectlombok:lombok:1.18.38")
 
-    compileOnly("net.elytrium.limboapi:api:1.1.26")
     compileOnly("org.geysermc.floodgate:api:2.2.4-SNAPSHOT")
     compileOnly("com.github.NEZNAMY:TAB-API:5.5.0")
 }
@@ -36,7 +34,6 @@ tasks.shadowJar {
     archiveBaseName.set("MultiAuth")
     archiveClassifier.set("")
     relocate("com.zaxxer.hikari", "cn.jason31416.multiauth.lib.hikari")
-    relocate("at.favre", "cn.jason31416.multiauth.lib.favre")
     exclude("org/slf4j/**")
     exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
 }

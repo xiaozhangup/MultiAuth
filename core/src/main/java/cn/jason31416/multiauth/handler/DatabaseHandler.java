@@ -20,7 +20,6 @@ public class DatabaseHandler implements IDatabaseHandler {
 
     public static final String TABLE_AUTH_METHODS = "multiauth_authmethods";
     public static final String TABLE_UUID_DATA = "multiauth_uuiddata";
-    public static final String TABLE_PASSWORD_BACKUP = "multiauth_passwordbackup";
 
     public HikariDataSource dataSource;
 
@@ -38,18 +37,17 @@ public class DatabaseHandler implements IDatabaseHandler {
         try (Connection connection = getConnection()) {
             connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_AUTH_METHODS + " (username VARCHAR(255) PRIMARY KEY, verified VARCHAR(255), preferred VARCHAR(255), modkey VARCHAR(255) default NULL)").execute();
             connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_UUID_DATA + " (username VARCHAR(255) PRIMARY KEY, uuid VARCHAR(255))").execute();
-            connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_PASSWORD_BACKUP + " (username VARCHAR(255) PRIMARY KEY, password VARCHAR(255), pubkeyhash VARCHAR(10))").execute();
         }
     }
 
     private HikariConfig buildDataSourceConfig() {
         HikariConfig config = new HikariConfig();
-        String host = Config.getString("authentication.password.mysql.host");
-        int port = Config.getInt("authentication.password.mysql.port");
-        String database = Config.getString("authentication.password.mysql.database");
-        String username = Config.getString("authentication.password.mysql.username");
-        String password = Config.getString("authentication.password.mysql.password");
-        String parameters = Config.getString("authentication.password.mysql.parameters");
+        String host = Config.getString("authentication.mysql.host");
+        int port = Config.getInt("authentication.mysql.port");
+        String database = Config.getString("authentication.mysql.database");
+        String username = Config.getString("authentication.mysql.username");
+        String password = Config.getString("authentication.mysql.password");
+        String parameters = Config.getString("authentication.mysql.parameters");
 
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
         StringBuilder url = new StringBuilder("jdbc:mysql://")

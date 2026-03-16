@@ -2,86 +2,34 @@
 lang: en-us
 
 authentication:
-  # The method used to determine if the player is using one of the listed auth servers.
-  # If falsely recognized user as premium, the user will be disconnected but the next time they join, they will be able to login via password
-  # If falsely recognized user as offline, the user will just need to use password authentication.
-  # Can be: UUID, REQUEST, AUTO
-  # UUID: Only recognize uuid patterns (works for PCL and launchers that supports the Bukkit-styled UUID format (Such as HMCL) )
-  # REQUEST: Send a request to the listed auth servers to check if the player is premium (Cached). Usually always works but will take longer.
-  # AUTO: Only send requests when necessary, otherwise use caches or UUID methods.
-
-  # ONLY CHOOSE REQUEST/AUTO IF YOU ARE FACING CASES WHERE UUID DOESN'T WORK!
-  filter-method: UUID
-
-  enable-fail-cache: true
-
   yggdrasil:
-    # If true, the plugin will verify the player's IP address when authenticating with Yggdrasil. Make sure that either there are no proxy before velocity or HAProxy is on.
+    # If true, the plugin will verify the player's IP address when authenticating with Yggdrasil.
+    # Make sure that either there are no proxy before velocity or HAProxy is on.
     verify-ip: true
-
-    # If true, the plugin will try to authenticate the player with their password even if Yggdrasil authentication fails.
-    # If false, the player will be kicked if they are not in offline mode and Yggdrasil authentication fails.
-    password-auth-when-failed: true
 
     # Enabled session servers for Yggdrasil authentication.
     auth-servers:
       mojang: "https://sessionserver.mojang.com/"
       littleskin: "https://littleskin.cn/api/yggdrasil/sessionserver/"
 
-  password:
-    auth-time: 180 # seconds
-    attempt-count: 3
-
-    method: MYSQL # MYSQL, UNIAUTH
-
-    mysql:
-      host: "localhost"
-      port: 3306
-      database: "authx"
-      username: "root"
-      password: ""
-      # Typical recommended value:
-      # "useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
-      parameters: ""
-
-    # If you don't know what is this or don't have an uniauth provider, please don't try it and use MYSQL instead.
-    uniauth:
-      url: "http://localhost:8500/"
-      api-key: ""
-
-      perform-local-backup: true
+  # Database connection settings for storing UUID and authentication method data.
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "authx"
+    username: "root"
+    password: ""
+    # Typical recommended value:
+    # "useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+    parameters: ""
 
 prefix: # Used for placeholder/TAB integration. Use %authx-auth-tag% in TAB to display.
-  offline: "<gray>Offline"
   mojang: "<green>Online"
   littleskin: "<yellow>Littleskin"
 
 log:
   pre-login: false
-  join-limbo: false
   auth-yggdrasil: true
-
-limbo-world:
-  gamemode: survival # Can be: survival, creative, adventure, spectator(Not suggested)
-  dimension: overworld # Can be: overworld, nether, the_end
-  position: # The position that the player will be spawned and teleported to when they join the limbo world.
-    x: 0
-    y: 64
-    z: 0
-    yaw: 0
-    pitch: 0
-  world-loader: # This is still in development, only VOID is available for now.
-    type: VOID
-#    file-name: "example.schem"
-#    offset-x: 0
-#    offset-y: 0
-#    offset-z: 0
-
-command:
-  change-password:
-    need-old-password: true
 
 regex:
   username-regex: ".*" # Suggested regex: "[a-zA-Z0-9_]{3,20}"
-#  email-regex: ".+@[a-zA-Z0-9_\\-\\.]+\\.[a-zA-Z]{2,}" # The regex pattern for email validation. The default option is a common email pattern.
-  password-regex: "[!-~]{3,20}" # The regex pattern for password validation. The default option includes any ASCII character from ! to ~.
