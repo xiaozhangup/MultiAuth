@@ -2,7 +2,7 @@ package cn.jason31416.multiauth;
 
 import cn.jason31416.multiauth.handler.LoginSession;
 import cn.jason31416.multiauth.hook.TABHandler;
-import cn.jason31416.multiauth.authbackend.LocalAuthenticator;
+import cn.jason31416.multiauth.authbackend.MySQLAuthenticator;
 import cn.jason31416.multiauth.authbackend.UniauthAuthenticator;
 import cn.jason31416.multiauth.command.AccountCommandHandler;
 import cn.jason31416.multiauth.command.AdminCommandHandler;
@@ -97,8 +97,7 @@ public class MultiAuth implements AuthXApi {
 
         AbstractAuthenticator.instance = switch(Config.getString("authentication.password.method").toLowerCase(Locale.ROOT)){
             case "uniauth" -> new UniauthAuthenticator();
-            case "sqlite" -> new LocalAuthenticator();
-            case "mysql" -> new LocalAuthenticator();
+            case "mysql" -> new MySQLAuthenticator();
             default -> throw new IllegalArgumentException("Invalid authentication.password.method: " + Config.getString("authentication.password.method"));
         };
         AbstractAuthenticator.getInstance().initialize();
