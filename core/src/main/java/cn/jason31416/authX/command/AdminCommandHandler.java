@@ -55,7 +55,7 @@ public class AdminCommandHandler implements SimpleCommand {
                     return;
                 }
                 if(AbstractAuthenticator.getInstance() instanceof UniauthAuthenticator){
-                    invocation.source().sendMessage(new Message("&cUniauth does not support unregistering users!").toComponent());
+                    invocation.source().sendMessage(new Message("<red>Uniauth does not support unregistering users!").toComponent());
                     return;
                 }
                 AbstractAuthenticator.getInstance().unregister(username);
@@ -95,10 +95,10 @@ public class AdminCommandHandler implements SimpleCommand {
             }
             case "clearcache" -> {
                 EventListener.loginPremiumFailedCache.clear();
-                invocation.source().sendMessage(new Message("&aCleared user authentication cache!").toComponent());
+                invocation.source().sendMessage(new Message("<green>Cleared user authentication cache!").toComponent());
             }
             case "" -> {
-                invocation.source().sendMessage(new Message("&aRunning &b&lAuthX v2 &aby Jason31416!").toComponent());
+                invocation.source().sendMessage(new Message("<green>Running <aqua><bold>AuthX v2</bold></aqua> by Jason31416!").toComponent());
             }
             default -> {
                 invocation.source().sendMessage(Message.getMessage("command.default").toComponent());
