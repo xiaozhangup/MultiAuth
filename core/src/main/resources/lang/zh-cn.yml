@@ -6,8 +6,6 @@ auth:
   failed-to-login: "<red>登录验证系统出错，请联系管理员!"
 
 tab-complete:
-  force-unregister:
-    player: "<玩家>"
   force-change-password:
     player: "<玩家>"
   profile:
@@ -21,10 +19,6 @@ command:
   no-permission: "<red>你没有权限执行该命令!"
 
   player-not-exists: "<red>玩家 %player% 不存在!"
-
-  force-unregister:
-    invalid-format: "<red>错误的格式! 请使用 <yellow>/authx unregister <玩家用户名>"
-    success: "<green>成功注销了 %player% !"
 
   reload:
     success: "<green>成功重载了 <aqua>AuthX <green>!"

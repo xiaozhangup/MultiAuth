@@ -28,14 +28,6 @@ public class AdminCommandHandler implements SimpleCommand {
             return;
         }
         switch (subCommand){
-            case "unregister" -> {
-                if(invocation.arguments().length<2){
-                    invocation.source().sendMessage(Message.getMessage("command.force-unregister.invalid-format").toComponent());
-                    return;
-                }
-                String username = invocation.arguments()[1];
-                invocation.source().sendMessage(Message.getMessage("command.force-unregister.success").add("player", username).toComponent());
-            }
             case "reload" -> {
                 MultiAuth.instance.init();
                 invocation.source().sendMessage(Message.getMessage("command.reload.success").toComponent());
@@ -177,10 +169,9 @@ public class AdminCommandHandler implements SimpleCommand {
     @Override
     public List<String> suggest(final @Nonnull Invocation invocation) {
         if(invocation.arguments().length<=1)
-            return List.of("unregister", "reload", "profile");
+            return List.of("reload", "profile");
         else if(invocation.arguments().length == 2){
             return switch (invocation.arguments()[0]){
-                case "unregister" -> List.of(Message.getMessage("tab-complete.force-unregister.player").toString());
                 case "profile" -> List.of("create", "set", "rename", "info");
                 default -> List.of();
             };

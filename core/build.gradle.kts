@@ -8,7 +8,6 @@ repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.codemc.org/repository/maven-public/")
     maven("https://repo.tcoded.com/releases")
-    maven("https://repo.opencollab.dev/main/")
     maven("https://jitpack.io")
     maven("https://maven.elytrium.net/repo/")
 }
@@ -26,7 +25,6 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.38")
     annotationProcessor("org.projectlombok:lombok:1.18.38")
 
-    compileOnly("org.geysermc.floodgate:api:2.2.4-SNAPSHOT")
     compileOnly("com.github.NEZNAMY:TAB-API:5.5.0")
 }
 

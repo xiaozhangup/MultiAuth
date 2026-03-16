@@ -1,8 +1,6 @@
 package cn.jason31416.multiauth.handler;
 
-import cn.jason31416.multiauth.MultiAuth;
 import cn.jason31416.multiauth.api.Profile;
-import cn.jason31416.multiauth.hook.FloodgateHandler;
 import cn.jason31416.multiauth.message.Message;
 import cn.jason31416.multiauth.util.Config;
 import cn.jason31416.multiauth.util.Logger;
@@ -39,10 +37,6 @@ public class EventListener {
 
             LoginSession session = new LoginSession(username, uuid);
             LoginSession.getSessionMap().put(username, session);
-
-            if (MultiAuth.getInstance().getProxy().getPluginManager().isLoaded("floodgate") && FloodgateHandler.isFloodgatePlayer(uuid)) {
-                return;
-            }
 
             event.setResult(PreLoginEvent.PreLoginComponentResult.forceOnlineMode());
 
@@ -86,7 +80,7 @@ public class EventListener {
             return;
         }
 
-        // Offline / Floodgate players.
+        // Offline players.
         UUID offlineUuid = UuidUtils.generateOfflinePlayerUuid(event.getUsername());
         Profile offlineProfile;
         try {

@@ -6,8 +6,6 @@ auth:
   failed-to-login: "<red>Login verification system error, please contact an administrator!"
 
 tab-complete:
-  force-unregister:
-    player: "<player>"
   force-change-password:
     player: "<player>"
   profile:
@@ -21,10 +19,6 @@ command:
   no-permission: "<red>You do not have permission to execute this command!"
 
   player-not-exists: "<red>The player %player% does not exist!"
-
-  force-unregister:
-    invalid-format: "<red>Incorrect format! Use <yellow>/authx unregister <player username>"
-    success: "<green>Successfully unregistered %player%!"
 
   reload:
     success: "<green>Successfully reloaded <aqua>AuthX<green>!"

@@ -32,7 +32,6 @@ import java.nio.file.Path;
         version = "2.2.1",
         authors = {"Jason31416", "oneLiLi"},
         dependencies = {
-                @Dependency(id = "floodgate", optional = true),
                 @Dependency(id = "tab", optional = true)
         }
 )
