@@ -1,36 +1,36 @@
 auth:
-  invalid-session: "&cInvalid session! Please log in again."
-  invalid-username: "&cInvalid username! Please avoid using weird characters."
-  unknown-error: "&cUnknown error! Please contact an administrator and try again."
+  invalid-session: "<red>Invalid session! Please log in again."
+  invalid-username: "<red>Invalid username! Please avoid using weird characters."
+  unknown-error: "<red>Unknown error! Please contact an administrator and try again."
 
-  failed-to-login: "&cLogin verification system error, please contact an administrator!"
+  failed-to-login: "<red>Login verification system error, please contact an administrator!"
 
-  user-input: "&7> %input%"
+  user-input: "<gray>> %input%"
 
-  failed-to-connect-to-backend: "&cUnable to connect to the backend server! Please try again later."
-  timeout: "&cLogin timed out! Please rejoin the server."
+  failed-to-connect-to-backend: "<red>Unable to connect to the backend server! Please try again later."
+  timeout: "<red>Login timed out! Please rejoin the server."
 
-  yggdrasil-new-need-verification: "&aThis is your first time joining the server with %auth_method%, a password verification is required to ensure your security!"
+  yggdrasil-new-need-verification: "<green>This is your first time joining the server with %auth_method%, a password verification is required to ensure your security!"
 
-  auth-bar-name: "&f%time% seconds remaining"
+  auth-bar-name: "<white>%time% seconds remaining"
 
   message-hint:
-    unknown: "&7Loading..."
-    login: "&bPlease type your &epassword &bin chat to log in!"
-    register_password: "&bPlease type a &epassword &bin chat to register!"
-    register_confirm_password: "&bPlease re-enter your password! &7('back' to go back)"
+    unknown: "<gray>Loading..."
+    login: "<aqua>Please type your <yellow>password <aqua>in chat to log in!"
+    register_password: "<aqua>Please type a <yellow>password <aqua>in chat to register!"
+    register_confirm_password: "<aqua>Please re-enter your password! <gray>('back' to go back)"
 
-  register-success: "&aRegistration successful! Welcome to the server!"
-  passwords-dont-match: "&cThe passwords you entered do not match! Please double-check."
-  password-doesnt-match-regex: "&cPassword does not meet the requirements! Please choose a secure and memorable password."
+  register-success: "<green>Registration successful! Welcome to the server!"
+  passwords-dont-match: "<red>The passwords you entered do not match! Please double-check."
+  password-doesnt-match-regex: "<red>Password does not meet the requirements! Please choose a secure and memorable password."
 
-  login-success: "&aLogin successful! Welcome back~"
-  max-attempts: "&cToo many login attempts! Please try again later."
-  email-not-verified: "&eLogin successful, please remember to bind your email!"
-  invalid-password: "&cIncorrect password! Did you perhaps forget?"
+  login-success: "<green>Login successful! Welcome back~"
+  max-attempts: "<red>Too many login attempts! Please try again later."
+  email-not-verified: "<yellow>Login successful, please remember to bind your email!"
+  invalid-password: "<red>Incorrect password! Did you perhaps forget?"
 
 chat:
-  password-blocked: "&cPlease don't tell others your password!"
+  password-blocked: "<red>Please don't tell others your password!"
 
 tab-complete:
   change-password:
@@ -44,30 +44,30 @@ tab-complete:
     uuid: "[UUID]"
 
 command:
-  player-command: "&cThis command is for players only and cannot be executed from the console!"
-  default: "&cUnknown subcommand!"
-  no-permission: "&cYou do not have permission to execute this command!"
+  player-command: "<red>This command is for players only and cannot be executed from the console!"
+  default: "<red>Unknown subcommand!"
+  no-permission: "<red>You do not have permission to execute this command!"
 
-  player-not-exists: "&cThe player %player% does not exist!"
+  player-not-exists: "<red>The player %player% does not exist!"
 
   change-password:
-    success: "&aPassword changed successfully! Please be sure to remember it!"
-    invalid-format-need-old-password: "&cIncorrect format! Use &e/account changepass <old password> <new password>"
-    invalid-format-no-old-password: "&cIncorrect format! Use &e/account changepass <new password>"
-    invalid-password: "&cIncorrect password! Did you perhaps forget?"
-    invalid-password-format: "&cPassword does not meet the requirements! Please choose a secure and memorable password."
+    success: "<green>Password changed successfully! Please be sure to remember it!"
+    invalid-format-need-old-password: "<red>Incorrect format! Use <yellow>/account changepass <old password> <new password>"
+    invalid-format-no-old-password: "<red>Incorrect format! Use <yellow>/account changepass <new password>"
+    invalid-password: "<red>Incorrect password! Did you perhaps forget?"
+    invalid-password-format: "<red>Password does not meet the requirements! Please choose a secure and memorable password."
 
   force-change-password:
-    success: "&aSuccessfully changed %player%'s password!"
-    invalid-format: "&cIncorrect format! Use &e/authx changepass <player username> <new password>"
+    success: "<green>Successfully changed %player%'s password!"
+    invalid-format: "<red>Incorrect format! Use <yellow>/authx changepass <player username> <new password>"
 
   force-unregister:
-    invalid-format: "&cIncorrect format! Use &e/authx unregister <player username>"
+    invalid-format: "<red>Incorrect format! Use <yellow>/authx unregister <player username>"
 
   reload:
-    success: "&aSuccessfully reloaded &bAuthX&a!"
+    success: "<green>Successfully reloaded <aqua>AuthX<green>!"
 
   set-uuid:
-    invalid-format: "&cIncorrect format! Use &e/authx setuuid <player username> [UUID]"
-    success: "&aSuccessfully set %player%'s UUID to %uuid%!"
-    invalid-uuid: "&cInvalid UUID format! Please check if the UUID is correct."
+    invalid-format: "<red>Incorrect format! Use <yellow>/authx setuuid <player username> [UUID]"
+    success: "<green>Successfully set %player%'s UUID to %uuid%!"
+    invalid-uuid: "<red>Invalid UUID format! Please check if the UUID is correct."

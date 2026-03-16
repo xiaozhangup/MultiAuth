@@ -1,36 +1,36 @@
 auth:
-  invalid-session: "&c无效的会话! 请重新登录"
-  invalid-username: "&c用户名不符合规范! 请使用英文字符与数字组合作为用户名!"
-  unknown-error: "&c未知错误! 请联系管理员并重试"
+  invalid-session: "<red>无效的会话! 请重新登录"
+  invalid-username: "<red>用户名不符合规范! 请使用英文字符与数字组合作为用户名!"
+  unknown-error: "<red>未知错误! 请联系管理员并重试"
 
-  failed-to-login: "&c登录验证系统出错，请联系管理员!"
+  failed-to-login: "<red>登录验证系统出错，请联系管理员!"
 
-  user-input: "&7> %input%"
+  user-input: "<gray>> %input%"
 
-  failed-to-connect-to-backend: "&c无法连接到后端服务器! 请稍后再试"
-  timeout: "&c登录超时! 请重新进入服务器哦"
+  failed-to-connect-to-backend: "<red>无法连接到后端服务器! 请稍后再试"
+  timeout: "<red>登录超时! 请重新进入服务器哦"
 
-  yggdrasil-new-need-verification: "&a这是你第一次使用 %auth_method% 进入服务器，需要进行密码验证来确保你的安全！"
+  yggdrasil-new-need-verification: "<green>这是你第一次使用 %auth_method% 进入服务器，需要进行密码验证来确保你的安全！"
 
-  auth-bar-name: "&f剩余 %time% 秒"
+  auth-bar-name: "<white>剩余 %time% 秒"
 
   message-hint:
-    unknown: "&7加载中..."
-    login: "&b请在聊天栏中输入您的 &e密码 &b进行登录!"
-    register_password: "&b请在聊天栏中输入一个 &e密码 &b进行注册!"
-    register_confirm_password: "&b请再次输入您的密码! &7('back'返回上一步)"
+    unknown: "<gray>加载中..."
+    login: "<aqua>请在聊天栏中输入您的 <yellow>密码 <aqua>进行登录!"
+    register_password: "<aqua>请在聊天栏中输入一个 <yellow>密码 <aqua>进行注册!"
+    register_confirm_password: "<aqua>请再次输入您的密码! <gray>('back'返回上一步)"
 
-  register-success: "&a注册成功! 欢迎来到服务器awa"
-  passwords-dont-match: "&c两次输入的密码不匹配! 请仔细检查哦"
-  password-doesnt-match-regex: "&c密码不符合要求! 换个安全又好记的密码吧~"
+  register-success: "<green>注册成功! 欢迎来到服务器awa"
+  passwords-dont-match: "<red>两次输入的密码不匹配! 请仔细检查哦"
+  password-doesnt-match-regex: "<red>密码不符合要求! 换个安全又好记的密码吧~"
 
-  login-success: "&a登录成功! 欢迎回来~"
-  max-attempts: "&c登录尝试次数过多! 请稍后再试"
-  email-not-verified: "&e登录成功，请记得绑定邮箱哦~"
-  invalid-password: "&c密码错误! 是不是记错了呢~"
+  login-success: "<green>登录成功! 欢迎回来~"
+  max-attempts: "<red>登录尝试次数过多! 请稍后再试"
+  email-not-verified: "<yellow>登录成功，请记得绑定邮箱哦~"
+  invalid-password: "<red>密码错误! 是不是记错了呢~"
 
 chat:
-  password-blocked: "&c请不要将自己的密码告诉别人哦!"
+  password-blocked: "<red>请不要将自己的密码告诉别人哦!"
 
 tab-complete:
   change-password:
@@ -44,34 +44,34 @@ tab-complete:
     uuid: "[UUID]"
 
 command:
-  player-command: "&c该命令为玩家命令，不可在控制台执行!"
-  default: "&c未知的子命令!"
-  no-permission: "&c你没有权限执行该命令!"
+  player-command: "<red>该命令为玩家命令，不可在控制台执行!"
+  default: "<red>未知的子命令!"
+  no-permission: "<red>你没有权限执行该命令!"
 
-  player-not-exists: "&c玩家 %player% 不存在!"
+  player-not-exists: "<red>玩家 %player% 不存在!"
 
   change-password:
-    success: "&a成功修改了密码! 请一定要牢牢记住哦!"
-    invalid-format-need-old-password: "&c错误的格式! 请使用 &e/account changepass <旧密码> <新密码>"
-    invalid-format-no-old-password: "&c错误的格式! 请使用 &e/account changepass <新密码>"
-    invalid-password: "&c错误的密码! 是不是记错了呢~"
-    invalid-password-format: "&c密码不符合要求! 换个安全又好记的密码吧~"
+    success: "<green>成功修改了密码! 请一定要牢牢记住哦!"
+    invalid-format-need-old-password: "<red>错误的格式! 请使用 <yellow>/account changepass <旧密码> <新密码>"
+    invalid-format-no-old-password: "<red>错误的格式! 请使用 <yellow>/account changepass <新密码>"
+    invalid-password: "<red>错误的密码! 是不是记错了呢~"
+    invalid-password-format: "<red>密码不符合要求! 换个安全又好记的密码吧~"
 
   force-change-password:
-    success: "&a成功修改了 %player% 的密码!"
-    invalid-format: "&c错误的格式! 请使用 &e/authx changepass <玩家用户名> <新密码>"
+    success: "<green>成功修改了 %player% 的密码!"
+    invalid-format: "<red>错误的格式! 请使用 <yellow>/authx changepass <玩家用户名> <新密码>"
 
   force-unregister:
-    invalid-format: "&c错误的格式! 请使用 &e/authx unregister <玩家用户名>"
+    invalid-format: "<red>错误的格式! 请使用 <yellow>/authx unregister <玩家用户名>"
 
   reload:
-    success: "&a成功重载了 &bAuthX &a!"
+    success: "<green>成功重载了 <aqua>AuthX <green>!"
 
   set-uuid:
-    invalid-format: "&c错误的格式! 请使用 &e/authx setuuid <玩家用户名> [UUID]"
-    success: "&a成功将 %player% 的 UUID 设置为 %uuid% !"
-    invalid-uuid: "&c无效的 UUID 格式! 请检查 UUID 是否正确!"
+    invalid-format: "<red>错误的格式! 请使用 <yellow>/authx setuuid <玩家用户名> [UUID]"
+    success: "<green>成功将 %player% 的 UUID 设置为 %uuid% !"
+    invalid-uuid: "<red>无效的 UUID 格式! 请检查 UUID 是否正确!"
 
   recover:
-    failed: "&c尝试恢复密码时遇到错误：%reason%"
-    success: "&a成功从备份恢复了 %count% 名玩家的密码!"
+    failed: "<red>尝试恢复密码时遇到错误：%reason%"
+    success: "<green>成功从备份恢复了 %count% 名玩家的密码!"
