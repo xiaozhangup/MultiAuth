@@ -18,12 +18,10 @@ dependencies {
 
     compileOnly("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
     compileOnly(files("../lib/velocity-3.4.0-SNAPSHOT-523.jar"))
+    annotationProcessor("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
 
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("at.favre.lib:bcrypt:0.9.0")
-    implementation("org.xerial:sqlite-jdbc:3.50.3.0")
-    implementation("com.mysql:mysql-connector-j:8.4.0")
-    implementation("org.jetbrains:annotations:23.0.0")
 
     compileOnly("org.projectlombok:lombok:1.18.38")
     annotationProcessor("org.projectlombok:lombok:1.18.38")
@@ -36,7 +34,9 @@ dependencies {
 tasks.shadowJar {
     archiveBaseName.set("MultiAuth")
     archiveClassifier.set("")
-    relocate("com.zaxxer.hikari", "cn.jason31416.authX.lib.hikari")
+    relocate("com.zaxxer.hikari", "cn.jason31416.multiauth.lib.hikari")
+    relocate("at.favre", "cn.jason31416.multiauth.lib.favre")
+    exclude("org/slf4j/**")
     exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
 }
 
