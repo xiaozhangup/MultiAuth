@@ -2,7 +2,7 @@ package cn.jason31416.multiauth.handler;
 
 import cn.jason31416.multiauth.util.Config;
 import cn.jason31416.multiauth.api.IDatabaseHandler;
-import com.velocitypowered.api.util.UuidUtils;
+import cn.jason31416.multiauth.api.Profile;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
@@ -11,6 +11,7 @@ import lombok.SneakyThrows;
 import javax.annotation.Nullable;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,7 +20,8 @@ public class DatabaseHandler implements IDatabaseHandler {
     private static final DatabaseHandler instance=new DatabaseHandler();
 
     public static final String TABLE_AUTH_METHODS = "multiauth_authmethods";
-    public static final String TABLE_UUID_DATA = "multiauth_uuiddata";
+    public static final String TABLE_PROFILES = "multiauth_profiles";
+    public static final String TABLE_LOGIN_PROFILE = "multiauth_login_profile";
 
     public HikariDataSource dataSource;
 
@@ -36,7 +38,8 @@ public class DatabaseHandler implements IDatabaseHandler {
 
         try (Connection connection = getConnection()) {
             connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_AUTH_METHODS + " (username VARCHAR(255) PRIMARY KEY, verified VARCHAR(255), preferred VARCHAR(255), modkey VARCHAR(255) default NULL)").execute();
-            connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_UUID_DATA + " (uuid VARCHAR(255) PRIMARY KEY, username VARCHAR(255))").execute();
+            connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_PROFILES + " (id INT NOT NULL AUTO_INCREMENT, uuid VARCHAR(255) NOT NULL UNIQUE, name VARCHAR(255) NOT NULL, PRIMARY KEY (id))").execute();
+            connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_LOGIN_PROFILE + " (auth_method VARCHAR(255) NOT NULL, login_uuid VARCHAR(255) NOT NULL, profile_id INT NOT NULL, PRIMARY KEY (auth_method, login_uuid))").execute();
         }
     }
 
@@ -65,87 +68,125 @@ public class DatabaseHandler implements IDatabaseHandler {
         return config;
     }
 
-    @SneakyThrows
     @Override
-    public void setUUID(String username, UUID uuid){
+    public int createProfile(UUID uuid, String name) throws SQLException {
         try (Connection connection = getConnection()) {
             var st = connection.prepareStatement(
-                    "INSERT INTO " + TABLE_UUID_DATA + " (uuid, username) VALUES (?,?) " +
-                    "ON DUPLICATE KEY UPDATE username = ?");
+                    "INSERT INTO " + TABLE_PROFILES + " (uuid, name) VALUES (?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
             st.setString(1, uuid.toString());
-            st.setString(2, username);
-            st.setString(3, username);
+            st.setString(2, name);
+            st.execute();
+            var rs = st.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            throw new SQLException("Failed to retrieve generated profile ID");
+        }
+    }
+
+    @SneakyThrows
+    @Override
+    @Nullable
+    public Profile getProfileById(int id) {
+        try (Connection connection = getConnection()) {
+            var st = connection.prepareStatement(
+                    "SELECT id, uuid, name FROM " + TABLE_PROFILES + " WHERE id = ?");
+            st.setInt(1, id);
+            var rs = st.executeQuery();
+            if (rs.next()) {
+                return new Profile(rs.getInt("id"), UUID.fromString(rs.getString("uuid")), rs.getString("name"));
+            }
+            return null;
+        }
+    }
+
+    @SneakyThrows
+    @Override
+    @Nullable
+    public Profile getProfileByLogin(String authMethod, UUID loginUuid) {
+        try (Connection connection = getConnection()) {
+            var st = connection.prepareStatement(
+                    "SELECT p.id, p.uuid, p.name FROM " + TABLE_PROFILES + " p " +
+                    "INNER JOIN " + TABLE_LOGIN_PROFILE + " lp ON p.id = lp.profile_id " +
+                    "WHERE lp.auth_method = ? AND lp.login_uuid = ?");
+            st.setString(1, authMethod);
+            st.setString(2, loginUuid.toString());
+            var rs = st.executeQuery();
+            if (rs.next()) {
+                return new Profile(rs.getInt("id"), UUID.fromString(rs.getString("uuid")), rs.getString("name"));
+            }
+            return null;
+        }
+    }
+
+    @SneakyThrows
+    @Override
+    public Profile getOrCreateProfileForLogin(String authMethod, UUID loginUuid, String name) {
+        Profile existing = getProfileByLogin(authMethod, loginUuid);
+        if (existing != null) {
+            return existing;
+        }
+        try (Connection connection = getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                var st = connection.prepareStatement(
+                        "INSERT INTO " + TABLE_PROFILES + " (uuid, name) VALUES (?, ?)",
+                        Statement.RETURN_GENERATED_KEYS);
+                st.setString(1, loginUuid.toString());
+                st.setString(2, name);
+                st.execute();
+                var rs = st.getGeneratedKeys();
+                if (!rs.next()) {
+                    throw new SQLException("Failed to retrieve generated profile ID");
+                }
+                int profileId = rs.getInt(1);
+
+                var st2 = connection.prepareStatement(
+                        "INSERT INTO " + TABLE_LOGIN_PROFILE + " (auth_method, login_uuid, profile_id) VALUES (?, ?, ?) " +
+                        "ON DUPLICATE KEY UPDATE profile_id = ?");
+                st2.setString(1, authMethod);
+                st2.setString(2, loginUuid.toString());
+                st2.setInt(3, profileId);
+                st2.setInt(4, profileId);
+                st2.execute();
+
+                connection.commit();
+                return new Profile(profileId, loginUuid, name);
+            } catch (Exception e) {
+                connection.rollback();
+                throw e;
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        }
+    }
+
+    @SneakyThrows
+    @Override
+    public void setLoginProfile(String authMethod, UUID loginUuid, int profileId) {
+        try (Connection connection = getConnection()) {
+            var st = connection.prepareStatement(
+                    "INSERT INTO " + TABLE_LOGIN_PROFILE + " (auth_method, login_uuid, profile_id) VALUES (?, ?, ?) " +
+                    "ON DUPLICATE KEY UPDATE profile_id = ?");
+            st.setString(1, authMethod);
+            st.setString(2, loginUuid.toString());
+            st.setInt(3, profileId);
+            st.setInt(4, profileId);
             st.execute();
         }
     }
 
     @SneakyThrows
     @Override
-    public UUID getUUID(String username) {
-        UUID result = getUUIDByUsername(username);
-        return result != null ? result : UuidUtils.generateOfflinePlayerUuid(username);
-    }
-
-    @SneakyThrows
-    @Override
-    @Nullable
-    public UUID getUUIDByUsername(String username) {
+    public void setProfileName(int id, String name) {
         try (Connection connection = getConnection()) {
             var st = connection.prepareStatement(
-                    "SELECT uuid FROM " + TABLE_UUID_DATA + " WHERE username = ?");
-            st.setString(1, username);
-            var rs = st.executeQuery();
-            if (rs.next()) {
-                return UUID.fromString(rs.getString("uuid"));
-            }
-            return null;
+                    "UPDATE " + TABLE_PROFILES + " SET name = ? WHERE id = ?");
+            st.setString(1, name);
+            st.setInt(2, id);
+            st.execute();
         }
-    }
-
-    @SneakyThrows
-    @Override
-    @Nullable
-    public String getUsernameByUUID(UUID uuid) {
-        try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement(
-                    "SELECT username FROM " + TABLE_UUID_DATA + " WHERE uuid = ?");
-            st.setString(1, uuid.toString());
-            var rs = st.executeQuery();
-            if (rs.next()) {
-                return rs.getString("username");
-            }
-            return null;
-        }
-    }
-
-    @Override
-    public String resolveAndPersistUUID(UUID uuid, String yggdrasilName) {
-        String storedName = getUsernameByUUID(uuid);
-
-        if (storedName != null && storedName.equals(yggdrasilName)) {
-            // UUID already mapped to this exact username — nothing to do.
-            return storedName;
-        }
-
-        // Either it's a new player, or the Yggdrasil name has changed.
-        // Check whether the desired name is already occupied by a *different* UUID.
-        UUID existingUuidForName = getUUIDByUsername(yggdrasilName);
-        String effectiveName;
-        if (existingUuidForName != null && !existingUuidForName.equals(uuid)) {
-            if (storedName != null) {
-                // Name change requested but new name is taken — keep the current stored name.
-                effectiveName = storedName;
-            } else {
-                // New player whose desired name is taken — append suffix to avoid conflict.
-                effectiveName = yggdrasilName + "1";
-            }
-        } else {
-            // Name is available (or belongs to this UUID already).
-            effectiveName = yggdrasilName;
-        }
-
-        setUUID(effectiveName, uuid);
-        return effectiveName;
     }
 
     @SneakyThrows

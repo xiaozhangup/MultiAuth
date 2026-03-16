@@ -6,13 +6,13 @@ auth:
   failed-to-login: "<red>Login verification system error, please contact an administrator!"
 
 tab-complete:
-  force-unregister:
-    player: "<player>"
   force-change-password:
     player: "<player>"
-  set-uuid:
-    player: "<player>"
-    uuid: "[UUID]"
+  profile:
+    name: "<name>"
+    id: "<profile-id>"
+    auth-method: "<auth-method>"
+    login-uuid: "<login-uuid>"
 
 command:
   default: "<red>Unknown subcommand!"
@@ -20,14 +20,26 @@ command:
 
   player-not-exists: "<red>The player %player% does not exist!"
 
-  force-unregister:
-    invalid-format: "<red>Incorrect format! Use <yellow>/authx unregister <player username>"
-    success: "<green>Successfully unregistered %player%!"
-
   reload:
     success: "<green>Successfully reloaded <aqua>AuthX<green>!"
 
-  set-uuid:
-    invalid-format: "<red>Incorrect format! Use <yellow>/authx setuuid <player username> [UUID]"
-    success: "<green>Successfully set %player%'s UUID to %uuid%!"
-    invalid-uuid: "<red>Invalid UUID format! Please check if the UUID is correct."
+  profile:
+    invalid-format: "<red>Incorrect format! Use <yellow>/multiauth profile <create|set|rename|info>"
+    not-found: "<red>Profile #%id% does not exist!"
+    create:
+      invalid-format: "<red>Incorrect format! Use <yellow>/multiauth profile create <name>"
+      success: "<green>Created profile <aqua>#%id%</aqua>, name: <aqua>%name%</aqua>, UUID: <aqua>%uuid%</aqua>"
+      failed: "<red>Failed to create profile: %error%"
+    set:
+      invalid-format: "<red>Incorrect format! Use <yellow>/multiauth profile set <auth_method> <login_uuid> <profile_id>"
+      invalid-uuid: "<red>Invalid UUID format!"
+      invalid-id: "<red>Invalid profile ID!"
+      success: "<green>Login <aqua>%auth_method%/%login_uuid%</aqua> is now mapped to profile <aqua>#%id%</aqua>"
+    rename:
+      invalid-format: "<red>Incorrect format! Use <yellow>/multiauth profile rename <profile_id> <new_name>"
+      invalid-id: "<red>Invalid profile ID!"
+      success: "<green>Profile <aqua>#%id%</aqua> has been renamed to <aqua>%name%</aqua>"
+    info:
+      invalid-format: "<red>Incorrect format! Use <yellow>/multiauth profile info <profile_id>"
+      invalid-id: "<red>Invalid profile ID!"
+      result: "<green>Profile <aqua>#%id%</aqua> | Name: <aqua>%name%</aqua> | UUID: <aqua>%uuid%</aqua>"

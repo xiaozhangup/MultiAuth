@@ -6,13 +6,13 @@ auth:
   failed-to-login: "<red>登录验证系统出错，请联系管理员!"
 
 tab-complete:
-  force-unregister:
-    player: "<玩家>"
   force-change-password:
     player: "<玩家>"
-  set-uuid:
-    player: "<玩家>"
-    uuid: "[UUID]"
+  profile:
+    name: "<名称>"
+    id: "<档案ID>"
+    auth-method: "<登录方式>"
+    login-uuid: "<登录UUID>"
 
 command:
   default: "<red>未知的子命令!"
@@ -20,14 +20,26 @@ command:
 
   player-not-exists: "<red>玩家 %player% 不存在!"
 
-  force-unregister:
-    invalid-format: "<red>错误的格式! 请使用 <yellow>/authx unregister <玩家用户名>"
-    success: "<green>成功注销了 %player% !"
-
   reload:
     success: "<green>成功重载了 <aqua>AuthX <green>!"
 
-  set-uuid:
-    invalid-format: "<red>错误的格式! 请使用 <yellow>/authx setuuid <玩家用户名> [UUID]"
-    success: "<green>成功将 %player% 的 UUID 设置为 %uuid% !"
-    invalid-uuid: "<red>无效的 UUID 格式! 请检查 UUID 是否正确!"
+  profile:
+    invalid-format: "<red>错误的格式! 请使用 <yellow>/multiauth profile <create|set|rename|info>"
+    not-found: "<red>档案 #%id% 不存在!"
+    create:
+      invalid-format: "<red>错误的格式! 请使用 <yellow>/multiauth profile create <名称>"
+      success: "<green>已创建档案 <aqua>#%id%</aqua>，名称: <aqua>%name%</aqua>，UUID: <aqua>%uuid%</aqua>"
+      failed: "<red>创建档案失败: %error%"
+    set:
+      invalid-format: "<red>错误的格式! 请使用 <yellow>/multiauth profile set <登录方式> <登录UUID> <档案ID>"
+      invalid-uuid: "<red>无效的 UUID 格式!"
+      invalid-id: "<red>无效的档案 ID!"
+      success: "<green>已将登录 <aqua>%auth_method%/%login_uuid%</aqua> 的档案设置为 <aqua>#%id%</aqua>"
+    rename:
+      invalid-format: "<red>错误的格式! 请使用 <yellow>/multiauth profile rename <档案ID> <新名称>"
+      invalid-id: "<red>无效的档案 ID!"
+      success: "<green>已将档案 <aqua>#%id%</aqua> 的名称修改为 <aqua>%name%</aqua>"
+    info:
+      invalid-format: "<red>错误的格式! 请使用 <yellow>/multiauth profile info <档案ID>"
+      invalid-id: "<red>无效的档案 ID!"
+      result: "<green>档案 <aqua>#%id%</aqua> | 名称: <aqua>%name%</aqua> | UUID: <aqua>%uuid%</aqua>"
