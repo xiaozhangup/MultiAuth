@@ -2,7 +2,7 @@
 
 ## 项目简介
 
-MultiAuth 是一个用于 [Velocity](https://velocitypowered.com/) 代理服务器的认证插件。它支持多种认证方式，包括 Yggdrasil（正版）认证、本地密码认证（SQLite/MySQL）以及 UniAuth 外部认证，同时与 LimboAPI、Floodgate（基岩版）、TAB 等插件深度集成。
+MultiAuth 是一个用于 [Velocity](https://velocitypowered.com/) 代理服务器的认证插件。它支持多种认证方式，包括 Yggdrasil（正版）认证、本地密码认证（MySQL/MariaDB）以及 UniAuth 外部认证，同时与 LimboAPI、Floodgate（基岩版）、TAB 等插件深度集成。
 
 ---
 
@@ -141,14 +141,14 @@ List<CompletableFuture<Boolean>> futures = servers.stream()
 
 ### 5. 数据库层（`DatabaseHandler`）
 
-基于 HikariCP 连接池，支持 SQLite（默认）和 MySQL：
+基于 HikariCP 连接池，支持 MySQL 和 MariaDB：
 
 | 数据表 | 说明 |
 |---|---|
-| `users` | 用户名、BCrypt 哈希密码、注册时间 |
-| `authmethods` | 玩家已使用的认证方式（yggdrasil/offline/littleskin）及偏好设置 |
-| `uuiddata` | 用户名与 UUID 的映射关系 |
-| `passwordbackup` | 密码备份（用于账号恢复） |
+| `multiauth_users` | 用户名、BCrypt 哈希密码、注册时间 |
+| `multiauth_authmethods` | 玩家已使用的认证方式（yggdrasil/offline/littleskin）及偏好设置 |
+| `multiauth_uuiddata` | 用户名与 UUID 的映射关系 |
+| `multiauth_passwordbackup` | 密码备份（用于账号恢复） |
 
 HikariCP 在 Shadow 打包时被重定向到 `cn.jason31416.multiauth.lib.hikari`，避免与服务器上其他插件的 HikariCP 产生冲突。
 
@@ -184,7 +184,7 @@ HikariCP 在 Shadow 打包时被重定向到 `cn.jason31416.multiauth.lib.hikari
 |---|---|---|
 | Yggdrasil（Mojang 正版） | UUID 匹配或 HTTP 验证通过 | `YggdrasilAuthenticator` |
 | Yggdrasil（LittleSkin） | LittleSkin 服务器验证通过 | `YggdrasilAuthenticator` |
-| 本地密码（SQLite/MySQL） | 非正版玩家，密码存于本地数据库 | `LocalAuthenticator` |
+| 本地密码（MySQL/MariaDB） | 非正版玩家，密码存于本地数据库 | `LocalAuthenticator` |
 | UniAuth 外部认证 | 配置 `method: UNIAUTH` | `UniauthAuthenticator` |
 | Floodgate（基岩版直通） | Floodgate 标识的基岩版玩家 | `FloodgateHandler` |
 
@@ -219,7 +219,7 @@ HikariCP 在 Shadow 打包时被重定向到 `cn.jason31416.multiauth.lib.hikari
 | `lang` | 语言（`en-us` / `zh-cn`） |
 | `authentication.filter-method` | 正版判断方式：`UUID`（纯 UUID 匹配）、`REQUEST`（HTTP 验证）、`AUTO`（混合） |
 | `authentication.yggdrasil.auth-servers` | Yggdrasil 服务器列表 |
-| `authentication.password.method` | 密码后端：`SQLITE` / `MYSQL` / `UNIAUTH` |
+| `authentication.password.method` | 密码后端：`MYSQL` / `UNIAUTH` |
 | `authentication.password.auth-time` | 认证超时时间（秒） |
 | `authentication.password.attempt-count` | 最大密码尝试次数 |
 | `limbo-world.*` | Limbo 世界配置（位置、游戏模式、维度） |
@@ -235,7 +235,7 @@ HikariCP 在 Shadow 打包时被重定向到 `cn.jason31416.multiauth.lib.hikari
     │
     ▼
 [EventListener.onPreLogin]
-    ├─ 查 authmethods 表 → 已知认证方式？
+    ├─ 查 multiauth_authmethods 表 → 已知认证方式？
     ├─ 调 YggdrasilAuthenticator → 是正版？
     └─ 创建 LoginSession（记录认证状态）
           │
@@ -247,5 +247,5 @@ HikariCP 在 Shadow 打包时被重定向到 `cn.jason31416.multiauth.lib.hikari
           │
           ▼ 认证成功后
 [DatabaseHandler]
-    └─ 更新 uuiddata / authmethods 表
+    └─ 更新 multiauth_uuiddata / multiauth_authmethods 表
 ```

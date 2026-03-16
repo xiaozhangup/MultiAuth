@@ -18,6 +18,10 @@ public class DatabaseHandler implements IDatabaseHandler {
     @Getter
     private static final DatabaseHandler instance=new DatabaseHandler();
 
+    public static final String TABLE_AUTH_METHODS = "multiauth_authmethods";
+    public static final String TABLE_UUID_DATA = "multiauth_uuiddata";
+    public static final String TABLE_PASSWORD_BACKUP = "multiauth_passwordbackup";
+
     public HikariDataSource dataSource;
 
     @Override
@@ -32,9 +36,9 @@ public class DatabaseHandler implements IDatabaseHandler {
         dataSource = new HikariDataSource(buildDataSourceConfig());
 
         try (Connection connection = getConnection()) {
-            connection.prepareStatement("CREATE TABLE IF NOT EXISTS authmethods (username VARCHAR(255) PRIMARY KEY, verified VARCHAR(255), preferred VARCHAR(255), modkey VARCHAR(255) default NULL)").execute();
-            connection.prepareStatement("CREATE TABLE IF NOT EXISTS uuiddata (username VARCHAR(255) PRIMARY KEY, uuid VARCHAR(255))").execute();
-            connection.prepareStatement("CREATE TABLE IF NOT EXISTS passwordbackup (username VARCHAR(255) PRIMARY KEY, password VARCHAR(255), pubkeyhash VARCHAR(10))").execute();
+            connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_AUTH_METHODS + " (username VARCHAR(255) PRIMARY KEY, verified VARCHAR(255), preferred VARCHAR(255), modkey VARCHAR(255) default NULL)").execute();
+            connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_UUID_DATA + " (username VARCHAR(255) PRIMARY KEY, uuid VARCHAR(255))").execute();
+            connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_PASSWORD_BACKUP + " (username VARCHAR(255) PRIMARY KEY, password VARCHAR(255), pubkeyhash VARCHAR(10))").execute();
         }
     }
 
@@ -67,9 +71,10 @@ public class DatabaseHandler implements IDatabaseHandler {
     @Override
     public void setUUID(String username, UUID uuid){
         try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement("INSERT INTO uuiddata (username, uuid) VALUES (?,?) AS new ON DUPLICATE KEY UPDATE uuid = new.uuid");
+            var st = connection.prepareStatement("INSERT INTO " + TABLE_UUID_DATA + " (username, uuid) VALUES (?,?) ON DUPLICATE KEY UPDATE uuid = ?");
             st.setString(1, username);
             st.setString(2, uuid.toString());
+            st.setString(3, uuid.toString());
             st.execute();
         }
     }
@@ -77,7 +82,7 @@ public class DatabaseHandler implements IDatabaseHandler {
     @Override
     public UUID getUUID(String username) {
         try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement("SELECT uuid FROM uuiddata WHERE username =?");
+            var st = connection.prepareStatement("SELECT uuid FROM " + TABLE_UUID_DATA + " WHERE username =?");
             st.setString(1, username);
             var rs = st.executeQuery();
             if (rs.next()) {
@@ -91,7 +96,7 @@ public class DatabaseHandler implements IDatabaseHandler {
     @SneakyThrows
     public void setModKey(String username, String modkey){
         try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement("UPDATE authmethods SET modkey =? WHERE username =?");
+            var st = connection.prepareStatement("UPDATE " + TABLE_AUTH_METHODS + " SET modkey =? WHERE username =?");
             st.setString(1, modkey);
             st.setString(2, username);
             st.execute();
@@ -100,7 +105,7 @@ public class DatabaseHandler implements IDatabaseHandler {
     @SneakyThrows @Nullable
     public String getModKey(String username) {
         try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement("SELECT modkey FROM authmethods WHERE username =?");
+            var st = connection.prepareStatement("SELECT modkey FROM " + TABLE_AUTH_METHODS + " WHERE username =?");
             st.setString(1, username);
             var rs = st.executeQuery();
             if (rs.next()) {
@@ -115,10 +120,11 @@ public class DatabaseHandler implements IDatabaseHandler {
     @Override
     public void setPreferred(String username, String method){
         try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement("INSERT INTO authmethods (username, verified, preferred) VALUES (?,?,?) AS new ON DUPLICATE KEY UPDATE preferred = new.preferred");
+            var st = connection.prepareStatement("INSERT INTO " + TABLE_AUTH_METHODS + " (username, verified, preferred) VALUES (?,?,?) ON DUPLICATE KEY UPDATE preferred = ?");
             st.setString(1, username);
             st.setString(2, "");
             st.setString(3, method);
+            st.setString(4, method);
             st.execute();
         }
     }
@@ -127,7 +133,7 @@ public class DatabaseHandler implements IDatabaseHandler {
     @Override
     public void addAuthMethod(String username, String method) { // it is assumed that user is already created
         try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement("UPDATE authmethods SET verified = CONCAT(COALESCE(verified, ''), ?) WHERE username =?");
+            var st = connection.prepareStatement("UPDATE " + TABLE_AUTH_METHODS + " SET verified = CONCAT(COALESCE(verified, ''), ?) WHERE username =?");
             st.setString(1, "," + method);
             st.setString(2, username);
             st.execute();
@@ -138,7 +144,7 @@ public class DatabaseHandler implements IDatabaseHandler {
     @Override
     public List<String> getAuthMethods(String username) {
         try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement("SELECT verified FROM authmethods WHERE username =?");
+            var st = connection.prepareStatement("SELECT verified FROM " + TABLE_AUTH_METHODS + " WHERE username =?");
             st.setString(1, username);
             var rs = st.executeQuery();
             if (rs.next()) {
@@ -157,7 +163,7 @@ public class DatabaseHandler implements IDatabaseHandler {
     @Override
     public String getPreferredMethod(String username) {
         try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement("SELECT preferred FROM authmethods WHERE username =?");
+            var st = connection.prepareStatement("SELECT preferred FROM " + TABLE_AUTH_METHODS + " WHERE username =?");
             st.setString(1, username);
             var rs = st.executeQuery();
             if (rs.next()) {

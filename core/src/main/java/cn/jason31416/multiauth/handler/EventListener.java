@@ -77,7 +77,10 @@ public class EventListener {
             }
 
             UUID uuid = event.getUniqueId();
-            if(event.getUniqueId() == null) uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + username).getBytes(StandardCharsets.UTF_8));
+            if(event.getUniqueId() == null) {
+                uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + username).getBytes(StandardCharsets.UTF_8));
+                Logger.warn("Player " + username + " has no UUID in PreLoginEvent, using offline-mode UUID: " + uuid);
+            }
             LoginSession session = new LoginSession(username, uuid);
             LoginSession.getSessionMap().put(username, session);
 

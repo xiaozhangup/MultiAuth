@@ -10,21 +10,15 @@ import java.util.UUID;
 public interface IDatabaseHandler {
     Connection getConnection() throws SQLException;
 
-    @SneakyThrows
     void setUUID(String username, UUID uuid);
 
-    @SneakyThrows
     UUID getUUID(String username);
 
-    @SneakyThrows
     void setPreferred(String username, String method);
 
-    @SneakyThrows
     void addAuthMethod(String username, String method);
 
-    @SneakyThrows
     List<String> getAuthMethods(String username);
 
-    @SneakyThrows
     String getPreferredMethod(String username);
 }

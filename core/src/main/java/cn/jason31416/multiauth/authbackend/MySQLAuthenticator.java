@@ -8,10 +8,12 @@ import lombok.SneakyThrows;
 import java.nio.charset.StandardCharsets;
 
 public class MySQLAuthenticator extends AbstractAuthenticator {
+    public static final String TABLE_USERS = "multiauth_users";
+
     @SneakyThrows
     public void initialize(){
         try(var conn = DatabaseHandler.getInstance().getConnection()){
-            conn.prepareStatement("CREATE TABLE IF NOT EXISTS users (username VARCHAR(255) PRIMARY KEY, password VARCHAR(255) DEFAULT NULL, email VARCHAR(255) DEFAULT NULL, format VARCHAR(255), register_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_USERS + " (username VARCHAR(255) PRIMARY KEY, password VARCHAR(255) DEFAULT NULL, email VARCHAR(255) DEFAULT NULL, format VARCHAR(255), register_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
                     .execute();
         }
     }
@@ -20,7 +22,7 @@ public class MySQLAuthenticator extends AbstractAuthenticator {
     @Override
     public UserStatus fetchStatus(String username) {
         try(var conn = DatabaseHandler.getInstance().getConnection()){
-            var stmt = conn.prepareStatement("SELECT * FROM users WHERE username =?");
+            var stmt = conn.prepareStatement("SELECT * FROM " + TABLE_USERS + " WHERE username =?");
             stmt.setString(1, username);
             var rs = stmt.executeQuery();
             if(rs.next()) {
@@ -46,7 +48,7 @@ public class MySQLAuthenticator extends AbstractAuthenticator {
     public RequestResult forceRegister(String username, String password) {
         if(fetchStatus(username)!= UserStatus.NOT_EXIST) return RequestResult.USER_ALREADY_EXISTS;
         try(var conn = DatabaseHandler.getInstance().getConnection()){
-            var stmt = conn.prepareStatement("INSERT INTO users (username, password, format, email) VALUES (?,?,?,?)");
+            var stmt = conn.prepareStatement("INSERT INTO " + TABLE_USERS + " (username, password, format, email) VALUES (?,?,?,?)");
             stmt.setString(1, username);
             stmt.setString(2, BCrypt.withDefaults().hashToString(10, password.toCharArray()));
             stmt.setString(3, "bcrypt");
@@ -60,7 +62,7 @@ public class MySQLAuthenticator extends AbstractAuthenticator {
     @Override
     public RequestResult authenticate(String username, String password) {
         try(var conn = DatabaseHandler.getInstance().getConnection()){
-            var stmt = conn.prepareStatement("SELECT * FROM users WHERE username =?");
+            var stmt = conn.prepareStatement("SELECT * FROM " + TABLE_USERS + " WHERE username =?");
             stmt.setString(1, username);
             var rs = stmt.executeQuery();
             if(rs.next()) {
@@ -85,7 +87,7 @@ public class MySQLAuthenticator extends AbstractAuthenticator {
     public RequestResult unregister(String username) {
         if(fetchStatus(username) == UserStatus.NOT_EXIST) return RequestResult.USER_DOESNT_EXIST;
         try(var conn = DatabaseHandler.getInstance().getConnection()){
-            var stmt = conn.prepareStatement("DELETE FROM users WHERE username =?;");
+            var stmt = conn.prepareStatement("DELETE FROM " + TABLE_USERS + " WHERE username =?;");
             stmt.setString(1, username);
             stmt.execute();
             return RequestResult.SUCCESS;
@@ -97,7 +99,7 @@ public class MySQLAuthenticator extends AbstractAuthenticator {
     public RequestResult changePassword(String username, String newPassword) {
         if(fetchStatus(username) == UserStatus.NOT_EXIST) return RequestResult.USER_DOESNT_EXIST;
         try(var conn = DatabaseHandler.getInstance().getConnection()){
-            var stmt = conn.prepareStatement("UPDATE users SET password = ? WHERE username =?");
+            var stmt = conn.prepareStatement("UPDATE " + TABLE_USERS + " SET password = ? WHERE username =?");
             stmt.setString(1, BCrypt.withDefaults().hashToString(10, newPassword.toCharArray()));
             stmt.setString(2, username);
             stmt.execute();

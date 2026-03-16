@@ -22,6 +22,7 @@ dependencies {
 
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("at.favre.lib:bcrypt:0.9.0")
+    implementation("mysql:mysql-connector-java:8.0.23")
 
     compileOnly("org.projectlombok:lombok:1.18.38")
     annotationProcessor("org.projectlombok:lombok:1.18.38")

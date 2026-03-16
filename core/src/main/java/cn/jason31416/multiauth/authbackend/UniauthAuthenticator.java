@@ -26,7 +26,7 @@ public class UniauthAuthenticator extends AbstractAuthenticator {
         String publicKey = UniAuthAPIClient.fetchPublicKey(false);
         String hashed = UniAuthAPIClient.hashWithFormat(publicKey, "SHA-256").substring(0, 8);
         try(var conn = DatabaseHandler.getInstance().getConnection()){
-            var st = conn.prepareStatement("REPLACE INTO passwordbackup (username, password, pubkeyhash) VALUES (?,?,?)");
+            var st = conn.prepareStatement("REPLACE INTO " + DatabaseHandler.TABLE_PASSWORD_BACKUP + " (username, password, pubkeyhash) VALUES (?,?,?)");
             st.setString(1, username);
             st.setString(2, RSAUtil.encryptByPublicKey(BCrypt.withDefaults().hashToString(10, password.toCharArray()), publicKey));
             st.setString(3, hashed);
@@ -49,10 +49,10 @@ public class UniauthAuthenticator extends AbstractAuthenticator {
         String pubkeyhash = UniAuthAPIClient.hashWithFormat(pubkey, "SHA-256").substring(0, 8);
 
         try(var conn = DatabaseHandler.getInstance().getConnection()){
-            conn.prepareStatement("CREATE TABLE IF NOT EXISTS users (username VARCHAR(255) PRIMARY KEY, password VARCHAR(255) DEFAULT NULL, email VARCHAR(255) DEFAULT NULL, format VARCHAR(255), register_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
+            conn.prepareStatement("CREATE TABLE IF NOT EXISTS " + MySQLAuthenticator.TABLE_USERS + " (username VARCHAR(255) PRIMARY KEY, password VARCHAR(255) DEFAULT NULL, email VARCHAR(255) DEFAULT NULL, format VARCHAR(255), register_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
                     .execute();
 
-            var st = conn.prepareStatement("SELECT * FROM passwordbackup");
+            var st = conn.prepareStatement("SELECT * FROM " + DatabaseHandler.TABLE_PASSWORD_BACKUP);
             var rs = st.executeQuery();
 
             while(rs.next()){
@@ -65,7 +65,7 @@ public class UniauthAuthenticator extends AbstractAuthenticator {
                         continue;
                     }
                     var decryptedPassword = RSAUtil.decryptByPrivateKey(encryptedPassword, privkey);
-                    var stmt = conn.prepareStatement("REPLACE INTO users (username, password, format, email) VALUES (?,?,?,?)");
+                    var stmt = conn.prepareStatement("REPLACE INTO " + MySQLAuthenticator.TABLE_USERS + " (username, password, format, email) VALUES (?,?,?,?)");
                     stmt.setString(1, username);
                     stmt.setString(2, decryptedPassword);
                     stmt.setString(3, "bcrypt");

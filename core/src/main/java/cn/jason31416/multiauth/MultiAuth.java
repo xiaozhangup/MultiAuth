@@ -41,13 +41,18 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-@Plugin(id = "multiauth", name = "MultiAuth", version = "2.2.1", authors = {"Jason31416", "oneLiLi"},
+@Plugin(
+        id = "multiauth",
+        name = "MultiAuth",
+        version = "2.2.1",
+        authors = {"Jason31416", "oneLiLi"},
         dependencies = {
-                @Dependency(id = "limboapi", optional = false),
+                @Dependency(id = "limboapi"),
                 @Dependency(id = "floodgate", optional = true),
                 @Dependency(id = "tab", optional = true)
-        })
-public class MultiAuth implements AuthXApi {
+        }
+)
+public class MultiAuth implements MultiAuthApi {
     @Getter
     public static MultiAuth instance;
 
@@ -115,7 +120,7 @@ public class MultiAuth implements AuthXApi {
     @Subscribe
     @SneakyThrows
     public void onProxyInitialization(ProxyInitializeEvent event) {
-        AuthX.setApiInstance(this);
+        cn.jason31416.multiauth.api.MultiAuth.setApiInstance(this);
         init();
 
         proxy.getEventManager().register(instance, new EventListener());

@@ -239,6 +239,7 @@ public class XLoginSessionHandler {
                         playerProfile = YggdrasilAuthenticator.authenticate(username, serverId, playerIp);
                     }catch (Exception e){
                         playerProfile = null;
+                        Logger.warn(e.getMessage());
                     }
 //                    Logger.info("Authed: "+(playerProfile == null));
                     try {

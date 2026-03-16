@@ -1,6 +1,6 @@
 package cn.jason31416.multiauth.api;
 
-public interface AuthXApi {
+public interface MultiAuthApi {
     /**
      * Fetches an instance of the authenticator, which allows you to quickly perform actions such as authentication, registration, etc.
      * If you wish, you can set your own authenticator with the `getAuthenticator().setInstance()` method, but try to do it before server finishes initialization.

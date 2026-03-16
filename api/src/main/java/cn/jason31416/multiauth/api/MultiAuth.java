@@ -3,12 +3,12 @@ package cn.jason31416.multiauth.api;
 import lombok.Setter;
 import javax.annotation.Nullable;
 
-public class AuthX {
+public class MultiAuth {
     @Setter
-    private static AuthXApi apiInstance=null;
+    private static MultiAuthApi apiInstance=null;
 
     @Nullable
-    public static AuthXApi getInstance(){
+    public static MultiAuthApi getInstance(){
         if(apiInstance==null){
             return null;
         }
