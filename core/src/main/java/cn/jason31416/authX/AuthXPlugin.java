@@ -41,7 +41,7 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-@Plugin(id = "authx", name = "AuthX", version = "2.1.4", authors = {"Jason31416", "oneLiLi"},
+@Plugin(id = "multiauth", name = "MultiAuth", version = "2.2.1", authors = {"Jason31416", "oneLiLi"},
         dependencies = {
                 @Dependency(id = "limboapi", optional = false),
                 @Dependency(id = "floodgate", optional = true),
@@ -92,7 +92,7 @@ public class AuthXPlugin implements AuthXApi {
 
         LimboHandler.limboWorld = factory
                 .createLimbo(authWorld)
-                .setName("AuthXLimbo")
+                .setName("MultiAuthLimbo")
                 .setGameMode(GameMode.valueOf(Config.getString("limbo-world.gamemode").toUpperCase(Locale.ROOT)));
 
         AbstractAuthenticator.instance = switch(Config.getString("authentication.password.method").toLowerCase(Locale.ROOT)){
@@ -151,7 +151,7 @@ public class AuthXPlugin implements AuthXApi {
             TABHandler.registerPlaceholder();
         }
 
-        logger.info("AuthX has been enabled!");
+        logger.info("MultiAuth has been enabled!");
     }
 
     public void info(String message) {

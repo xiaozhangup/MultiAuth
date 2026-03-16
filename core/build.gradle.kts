@@ -1,0 +1,45 @@
+plugins {
+    java
+    id("com.gradleup.shadow") version "8.3.6"
+}
+
+repositories {
+    mavenCentral()
+    maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.codemc.org/repository/maven-public/")
+    maven("https://repo.tcoded.com/releases")
+    maven("https://repo.opencollab.dev/main/")
+    maven("https://jitpack.io")
+    maven("https://maven.elytrium.net/repo/")
+}
+
+dependencies {
+    implementation(project(":api"))
+
+    compileOnly("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
+    compileOnly(files("../lib/velocity-3.4.0-SNAPSHOT-523.jar"))
+
+    implementation("com.zaxxer:HikariCP:5.1.0")
+    implementation("at.favre.lib:bcrypt:0.9.0")
+    implementation("org.xerial:sqlite-jdbc:3.50.3.0")
+    implementation("com.mysql:mysql-connector-j:8.4.0")
+    implementation("org.jetbrains:annotations:23.0.0")
+
+    compileOnly("org.projectlombok:lombok:1.18.38")
+    annotationProcessor("org.projectlombok:lombok:1.18.38")
+
+    compileOnly("net.elytrium.limboapi:api:1.1.26")
+    compileOnly("org.geysermc.floodgate:api:2.2.4-SNAPSHOT")
+    compileOnly("com.github.NEZNAMY:TAB-API:5.5.0")
+}
+
+tasks.shadowJar {
+    archiveBaseName.set("MultiAuth")
+    archiveClassifier.set("")
+    relocate("com.zaxxer.hikari", "cn.jason31416.authX.lib.hikari")
+    exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
+}
+
+tasks.build {
+    dependsOn(tasks.shadowJar)
+}
