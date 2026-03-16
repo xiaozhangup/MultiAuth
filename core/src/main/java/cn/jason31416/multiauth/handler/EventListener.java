@@ -1,6 +1,7 @@
 package cn.jason31416.multiauth.handler;
 
 import cn.jason31416.multiauth.MultiAuth;
+import cn.jason31416.multiauth.api.Profile;
 import cn.jason31416.multiauth.hook.FloodgateHandler;
 import cn.jason31416.multiauth.message.Message;
 import cn.jason31416.multiauth.util.Config;
@@ -11,6 +12,7 @@ import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.player.GameProfileRequestEvent;
 import com.velocitypowered.api.util.GameProfile;
+import com.velocitypowered.api.util.UuidUtils;
 import lombok.SneakyThrows;
 
 import javax.annotation.Nonnull;
@@ -68,21 +70,32 @@ public class EventListener {
         UUID authenticatedUuid = event.getOriginalProfile().getId();
         if (authenticatedUuid != null) {
             // Online / Yggdrasil-authenticated player.
-            // Resolve the effective username: respects UUID-based identity (name changes)
-            // and appends "1" when a different player already owns the desired name.
             String yggdrasilName = event.getOriginalProfile().getName();
-            String effectiveName;
+            String authMethod = session.getAuthMethod();
+            if (authMethod == null) authMethod = "unknown";
+
+            Profile profile;
             try {
-                effectiveName = DatabaseHandler.getInstance().resolveAndPersistUUID(authenticatedUuid, yggdrasilName);
+                profile = DatabaseHandler.getInstance().getOrCreateProfileForLogin(authMethod, authenticatedUuid, yggdrasilName);
             } catch (Exception e) {
-                Logger.warn("Failed to resolve/persist UUID for " + yggdrasilName + ": " + e.getMessage());
-                effectiveName = yggdrasilName;
+                Logger.warn("Failed to get/create profile for " + yggdrasilName + ": " + e.getMessage());
+                event.setGameProfile(new GameProfile(authenticatedUuid, yggdrasilName, event.getOriginalProfile().getProperties()));
+                return;
             }
-            event.setGameProfile(new GameProfile(authenticatedUuid, effectiveName, event.getOriginalProfile().getProperties()));
+            event.setGameProfile(new GameProfile(profile.uuid, profile.name, event.getOriginalProfile().getProperties()));
             return;
         }
 
-        GameProfile profile = event.getOriginalProfile().withId(DatabaseHandler.getInstance().getUUID(event.getUsername()));
-        event.setGameProfile(profile);
+        // Offline / Floodgate players.
+        UUID offlineUuid = UuidUtils.generateOfflinePlayerUuid(event.getUsername());
+        Profile offlineProfile;
+        try {
+            offlineProfile = DatabaseHandler.getInstance().getOrCreateProfileForLogin("offline", offlineUuid, event.getUsername());
+        } catch (Exception e) {
+            Logger.warn("Failed to get/create profile for offline player " + event.getUsername() + ": " + e.getMessage());
+            event.setGameProfile(event.getOriginalProfile().withId(offlineUuid));
+            return;
+        }
+        event.setGameProfile(event.getOriginalProfile().withId(offlineProfile.uuid));
     }
 }
