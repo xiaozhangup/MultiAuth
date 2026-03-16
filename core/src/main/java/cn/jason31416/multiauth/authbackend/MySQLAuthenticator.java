@@ -7,7 +7,7 @@ import lombok.SneakyThrows;
 
 import java.nio.charset.StandardCharsets;
 
-public class LocalAuthenticator extends AbstractAuthenticator {
+public class MySQLAuthenticator extends AbstractAuthenticator {
     @SneakyThrows
     public void initialize(){
         try(var conn = DatabaseHandler.getInstance().getConnection()){
