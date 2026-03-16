@@ -16,7 +16,6 @@ import cn.jason31416.multiauth.util.PlayerProfile;
 import com.google.common.primitives.Longs;
 import com.velocitypowered.api.proxy.crypto.IdentifiedKey;
 import com.velocitypowered.api.util.GameProfile;
-import com.velocitypowered.api.util.UuidUtils;
 import com.velocitypowered.proxy.VelocityServer;
 import com.velocitypowered.proxy.connection.MinecraftConnection;
 import com.velocitypowered.proxy.connection.client.AuthSessionHandler;
@@ -37,10 +36,15 @@ import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Getter
 public class XLoginSessionHandler {
+    /** Regex to insert dashes into a 32-character UUID string without dashes (Yggdrasil format). */
+    private static final String UUID_FORMAT_PATTERN = "(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})";
+
     private static EnumAccessor loginStatsEnumAccessor;
     private static Accessor initialLoginSessionHandlerAccessor;
 
@@ -262,36 +266,43 @@ public class XLoginSessionHandler {
                                 }
                             }
                             if (playerProfile == null) { // If authentication failed
-                                LoginSession session = LoginSession.getSession(username);
-                                if (Config.getBoolean("authentication.yggdrasil.password-auth-when-failed") && !session.isEnforcePrimaryMethod()) {
-                                    session.setVerifyPassword(true);
-                                    mcConnection.getChannel().eventLoop().submit(() -> {
-                                        try{
-                                            this.mcConnection.setActiveSessionHandler(StateRegistry.LOGIN,
-                                                    newAuthSessionHandler(
-                                                            inbound, new GameProfile(
-                                                                    UuidUtils.generateOfflinePlayerUuid(login.getUsername()),
-                                                                    login.getUsername(),
-                                                                    new ArrayList<>())
-                                                            , false)
-                                            );
-                                        } catch (Throwable e) {
-                                            throw new RuntimeException(e);
-                                        }
-                                    });
-                                } else {
-                                    this.inbound.disconnect(Message.getMessage("authentication.invalid-session").toComponent());
-                                }
+                                this.inbound.disconnect(Message.getMessage("authentication.invalid-session").toComponent());
                                 return;
                             }
+                            // Security: use the UUID and name returned by the Yggdrasil auth server,
+                            // not an offline-generated UUID, to prevent UUID impersonation.
+                            String rawId = playerProfile.id;
+                            UUID yggdrasilUuid;
+                            try {
+                                yggdrasilUuid = rawId.contains("-") ? UUID.fromString(rawId) :
+                                        UUID.fromString(rawId.replaceFirst(UUID_FORMAT_PATTERN, "$1-$2-$3-$4-$5"));
+                            } catch (Exception uuidEx) {
+                                Logger.error("Invalid UUID from Yggdrasil for " + username + ": " + rawId);
+                                this.inbound.disconnect(Message.getMessage("authentication.invalid-session").toComponent());
+                                return;
+                            }
+                            List<GameProfile.Property> props = new ArrayList<>();
+                            if (playerProfile.properties != null) {
+                                for (var p : playerProfile.properties) {
+                                    String propName = (String) p.get("name");
+                                    String propValue = (String) p.get("value");
+                                    String propSig = (String) p.getOrDefault("signature", null);
+                                    if (propName != null && propValue != null) {
+                                        props.add(new GameProfile.Property(propName, propValue, propSig));
+                                    }
+                                }
+                            }
+                            // Capture as effectively-final for lambda
+                            final UUID finalUuid = yggdrasilUuid;
+                            final String finalName = playerProfile.name;
                             mcConnection.getChannel().eventLoop().submit(() -> {
                                 try {
                                     this.mcConnection.setActiveSessionHandler(StateRegistry.LOGIN,
                                             newAuthSessionHandler(
                                                     inbound, new GameProfile(
-                                                            UuidUtils.generateOfflinePlayerUuid(login.getUsername()),
-                                                            login.getUsername(),
-                                                            new ArrayList<>())
+                                                            finalUuid,
+                                                            finalName,
+                                                            props)
                                                     , true)
                                     );
                                 } catch (Throwable e) {
