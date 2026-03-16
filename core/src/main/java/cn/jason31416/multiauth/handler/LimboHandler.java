@@ -62,6 +62,13 @@ public class LimboHandler implements LimboSessionHandler {
 
         var session = LoginSession.getSessionMap().get(player.getUsername());
         if(session == null) return;
+
+        try {
+            DatabaseHandler.getInstance().setUUID(player.getUsername(), session.getUuid());
+        } catch (Exception e) {
+            player.sendMessage(Message.getMessage("auth.unknown-error").toComponent());
+        }
+
         if(session.getAuthMethod()!=null&&!session.getAuthMethod().isEmpty()){
             DatabaseHandler.getInstance().addAuthMethod(player.getUsername(), session.getAuthMethod());
         }else{

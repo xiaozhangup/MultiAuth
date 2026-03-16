@@ -84,12 +84,6 @@ public class EventListener {
             LoginSession session = new LoginSession(username, uuid);
             LoginSession.getSessionMap().put(username, session);
 
-            try {
-                DatabaseHandler.getInstance().setUUID(username, uuid);
-            } catch (Exception e) {
-                Logger.warn("Failed to persist UUID for " + username + ": " + e.getMessage());
-            }
-
             if (MultiAuth.getInstance().getProxy().getPluginManager().isLoaded("floodgate") && FloodgateHandler.isFloodgatePlayer(event.getUniqueId())) {
                 return;
             }
@@ -150,6 +144,7 @@ public class EventListener {
         }catch (Throwable e){
             Logger.error("Error when prelogin: "+e.getMessage());
             e.printStackTrace();
+            event.setResult(PreLoginEvent.PreLoginComponentResult.denied(Message.getMessage("auth.failed-to-login").toComponent()));
         }
     }
 
@@ -186,6 +181,22 @@ public class EventListener {
 
     @Subscribe(order = PostOrder.FIRST)
     public void onGameProfileRequest(GameProfileRequestEvent event) {
+        LoginSession session = LoginSession.getSessionMap().get(event.getUsername());
+        if (session == null || session.isVerifyPassword()) {
+            return;
+        }
+
+        UUID authenticatedUuid = event.getOriginalProfile().getId();
+        if (authenticatedUuid != null) {
+            try {
+                DatabaseHandler.getInstance().setUUID(event.getUsername(), authenticatedUuid);
+            } catch (Exception e) {
+                Logger.warn("Failed to persist authenticated UUID for " + event.getUsername() + ": " + e.getMessage());
+            }
+            event.setGameProfile(event.getOriginalProfile().withId(authenticatedUuid));
+            return;
+        }
+
         GameProfile profile = event.getOriginalProfile().withId(DatabaseHandler.getInstance().getUUID(event.getUsername()));
         event.setGameProfile(profile);
     }
