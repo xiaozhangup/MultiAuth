@@ -3,6 +3,7 @@ package cn.jason31416.multiauth.command;
 import cn.jason31416.multiauth.MultiAuth;
 import cn.jason31416.multiauth.api.Profile;
 import cn.jason31416.multiauth.handler.DatabaseHandler;
+import cn.jason31416.multiauth.handler.LegacyDataMigrator;
 import cn.jason31416.multiauth.handler.Whitelist;
 import cn.jason31416.multiauth.message.Message;
 import com.velocitypowered.api.command.SimpleCommand;
@@ -38,6 +39,9 @@ public class AdminCommandHandler implements SimpleCommand {
             }
             case "whitelist" -> {
                 handleWhitelistCommand(invocation);
+            }
+            case "migrate" -> {
+                handleMigrateCommand(invocation);
             }
             case "" -> {
                 invocation.source().sendMessage(new Message("<green>Running <aqua><bold>AuthX v2</bold></aqua> by Jason31416!").toComponent());
@@ -238,10 +242,33 @@ public class AdminCommandHandler implements SimpleCommand {
         }
     }
 
+    private void handleMigrateCommand(SimpleCommand.Invocation invocation) {
+        if (invocation.arguments().length != 1) {
+            invocation.source().sendMessage(Message.getMessage("command.migrate.invalid-format").toComponent());
+            return;
+        }
+
+        invocation.source().sendMessage(Message.getMessage("command.migrate.started").toComponent());
+
+        try {
+            LegacyDataMigrator.MigrationResult result = LegacyDataMigrator.getInstance().migrate();
+            invocation.source().sendMessage(Message.getMessage("command.migrate.finished")
+                    .add("total", result.totalRows)
+                    .add("migrated", result.migratedRows)
+                    .add("skipped", result.skippedRows)
+                    .add("failed", result.failedRows)
+                    .toComponent());
+        } catch (Exception e) {
+            invocation.source().sendMessage(Message.getMessage("command.migrate.failed")
+                    .add("error", e.getMessage())
+                    .toComponent());
+        }
+    }
+
     @Override
     public List<String> suggest(final @Nonnull Invocation invocation) {
         if(invocation.arguments().length<=1)
-            return List.of("reload", "profile", "whitelist");
+            return List.of("reload", "profile", "whitelist", "migrate");
         else if(invocation.arguments().length == 2){
             return switch (invocation.arguments()[0]){
                 case "profile" -> List.of("create", "set", "rename", "info");

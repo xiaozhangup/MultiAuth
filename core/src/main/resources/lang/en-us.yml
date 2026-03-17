@@ -60,3 +60,9 @@ command:
       invalid-format: "Incorrect format! Use /multiauth whitelist list <auth_method>"
       header: "Whitelist for %auth_method% (%count% players):"
       empty: "The whitelist for %auth_method% is empty."
+
+  migrate:
+    invalid-format: "Incorrect format! Use /multiauth migrate"
+    started: "Started migrating data from table multilogin_user_data_v3..."
+    finished: "Migration finished: total %total% | migrated %migrated% | skipped %skipped% | failed %failed%"
+    failed: "Migration failed: error: %error%"

@@ -60,3 +60,9 @@ command:
       invalid-format: "错误的格式! 请使用 /multiauth whitelist list <登录方式>"
       header: "%auth_method% 的白名单 (共 %count% 名玩家):"
       empty: "%auth_method% 的白名单为空"
+
+  migrate:
+    invalid-format: "错误的格式! 请使用 /multiauth migrate"
+    started: "开始从旧表 multilogin_user_data_v3 迁移数据..."
+    finished: "迁移完成: 总数 %total% | 成功 %migrated% | 跳过 %skipped% | 失败 %failed%"
+    failed: "迁移失败: 错误: %error%"
