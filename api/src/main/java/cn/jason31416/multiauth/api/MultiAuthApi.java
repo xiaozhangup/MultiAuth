@@ -2,7 +2,7 @@ package cn.jason31416.multiauth.api;
 
 public interface MultiAuthApi {
     /**
-     * Fetches an instance of the Database Handler that allows you to directly modify AuthX's database.
+     * Fetches an instance of the Database Handler that allows you to directly modify MultiAuth's database.
      * @return DatabaseHandler instance
      */
     IDatabaseHandler getDatabaseHandler();

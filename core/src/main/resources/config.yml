@@ -23,14 +23,14 @@ authentication:
   mysql:
     host: "localhost"
     port: 3306
-    database: "authx"
+    database: "multiauth"
     username: "root"
     password: ""
     # Typical recommended value:
     # "useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
     parameters: ""
 
-prefix: # Used for placeholder/TAB integration. Use %authx-auth-tag% in TAB to display.
+prefix: # Used for placeholder/TAB integration. Use %multiauth-auth-tag% in TAB to display.
   mojang: "<green>Online"
   littleskin: "<yellow>Littleskin"
 

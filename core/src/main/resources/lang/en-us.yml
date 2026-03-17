@@ -24,7 +24,7 @@ command:
   player-not-exists: "The player %player% does not exist!"
 
   reload:
-    success: "Successfully reloaded AuthX!"
+    success: "Successfully reloaded MultiAuth!"
 
   profile:
     invalid-format: "Incorrect format! Use /multiauth profile <create|set|rename|info>"

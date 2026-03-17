@@ -24,7 +24,7 @@ command:
   player-not-exists: "玩家 %player% 不存在!"
 
   reload:
-    success: "成功重载了 AuthX !"
+    success: "成功重载了 MultiAuth !"
 
   profile:
     invalid-format: "错误的格式! 请使用 /multiauth profile <create|set|rename|info>"

@@ -44,7 +44,7 @@ public class AdminCommandHandler implements SimpleCommand {
                 handleMigrateCommand(invocation);
             }
             case "" -> {
-                invocation.source().sendMessage(new Message("<green>Running <aqua><bold>AuthX v2</bold></aqua> by Jason31416!").toComponent());
+                invocation.source().sendMessage(new Message("<green>Running <aqua><bold>MultiAuth v2</bold></aqua> by Jason31416!").toComponent());
             }
             default -> {
                 invocation.source().sendMessage(Message.getMessage("command.default").toComponent());

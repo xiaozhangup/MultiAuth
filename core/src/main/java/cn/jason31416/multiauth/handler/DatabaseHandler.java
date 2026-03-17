@@ -57,7 +57,7 @@ public class DatabaseHandler implements IDatabaseHandler {
                 .append(":")
                 .append(port <= 0 ? 3306 : port)
                 .append("/")
-                .append(database.isEmpty() ? "authx" : database);
+                .append(database.isEmpty() ? "multiauth" : database);
         if (!parameters.isEmpty()) {
             url.append("?").append(parameters);
         }
