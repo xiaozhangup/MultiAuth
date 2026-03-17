@@ -95,5 +95,6 @@ public class EventListener {
             return;
         }
         event.setGameProfile(event.getOriginalProfile().withId(offlineProfile.uuid));
+        Logger.warn("Used offline UUID " + offlineProfile.uuid + " for player " + event.getUsername() + ".");
     }
 }
