@@ -184,7 +184,7 @@ public class DatabaseHandler implements IDatabaseHandler {
 
     private String resolveUniqueProfileName(Connection connection, String baseName) throws SQLException {
         String candidate = baseName;
-        int maxAttempts = 100;
+        int maxAttempts = 4;
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
             try (var st = connection.prepareStatement(
                     "SELECT 1 FROM " + TABLE_PROFILES + " WHERE name = ? LIMIT 1")) {
@@ -198,7 +198,7 @@ public class DatabaseHandler implements IDatabaseHandler {
             candidate = baseName + "_".repeat(attempt + 1);
         }
         // Fallback: append a short UUID fragment to guarantee uniqueness
-        return baseName + "_" + UUID.randomUUID().toString().substring(0, 8);
+        return baseName + "_" + UUID.randomUUID().toString().substring(0, 3);
     }
 
     @SneakyThrows
