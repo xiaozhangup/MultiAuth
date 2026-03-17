@@ -49,9 +49,5 @@ public interface IDatabaseHandler {
 
     void setPreferred(String username, String method);
 
-    void addAuthMethod(String username, String method);
-
-    List<String> getAuthMethods(String username);
-
     String getPreferredMethod(String username);
 }

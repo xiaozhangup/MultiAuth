@@ -37,7 +37,7 @@ public class DatabaseHandler implements IDatabaseHandler {
         dataSource = new HikariDataSource(buildDataSourceConfig());
 
         try (Connection connection = getConnection()) {
-            connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_AUTH_METHODS + " (username VARCHAR(255) PRIMARY KEY, verified VARCHAR(255), preferred VARCHAR(255), modkey VARCHAR(255) default NULL)").execute();
+            connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_AUTH_METHODS + " (username VARCHAR(255) PRIMARY KEY, preferred VARCHAR(255))").execute();
             connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_PROFILES + " (id INT NOT NULL AUTO_INCREMENT, uuid VARCHAR(36) NOT NULL UNIQUE, name VARCHAR(255) NOT NULL, PRIMARY KEY (id))").execute();
             connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_LOGIN_PROFILE + " (auth_method VARCHAR(255) NOT NULL, login_uuid VARCHAR(36) NOT NULL, profile_id INT NOT NULL, PRIMARY KEY (auth_method, login_uuid))").execute();
         }
@@ -130,11 +130,13 @@ public class DatabaseHandler implements IDatabaseHandler {
         try (Connection connection = getConnection()) {
             connection.setAutoCommit(false);
             try {
+                String resolvedName = resolveUniqueProfileName(connection, name);
+
                 var st = connection.prepareStatement(
                         "INSERT INTO " + TABLE_PROFILES + " (uuid, name) VALUES (?, ?)",
                         Statement.RETURN_GENERATED_KEYS);
                 st.setString(1, loginUuid.toString());
-                st.setString(2, name);
+                st.setString(2, resolvedName);
                 st.execute();
                 var rs = st.getGeneratedKeys();
                 if (!rs.next()) {
@@ -152,13 +154,27 @@ public class DatabaseHandler implements IDatabaseHandler {
                 st2.execute();
 
                 connection.commit();
-                return new Profile(profileId, loginUuid, name);
+                return new Profile(profileId, loginUuid, resolvedName);
             } catch (Exception e) {
                 connection.rollback();
                 throw e;
             } finally {
                 connection.setAutoCommit(true);
             }
+        }
+    }
+
+    private String resolveUniqueProfileName(Connection connection, String baseName) throws SQLException {
+        String candidate = baseName;
+        while (true) {
+            var st = connection.prepareStatement(
+                    "SELECT 1 FROM " + TABLE_PROFILES + " WHERE name = ? LIMIT 1");
+            st.setString(1, candidate);
+            var rs = st.executeQuery();
+            if (!rs.next()) {
+                return candidate;
+            }
+            candidate = candidate + "_";
         }
     }
 
@@ -190,71 +206,17 @@ public class DatabaseHandler implements IDatabaseHandler {
     }
 
     @SneakyThrows
-    public void setModKey(String username, String modkey){
-        try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement("UPDATE " + TABLE_AUTH_METHODS + " SET modkey =? WHERE username =?");
-            st.setString(1, modkey);
-            st.setString(2, username);
-            st.execute();
-        }
-    }
-    @SneakyThrows @Nullable
-    public String getModKey(String username) {
-        try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement("SELECT modkey FROM " + TABLE_AUTH_METHODS + " WHERE username =?");
-            st.setString(1, username);
-            var rs = st.executeQuery();
-            if (rs.next()) {
-                return rs.getString("modkey");
-            } else {
-                return null;
-            }
-        }
-    }
-
-    @SneakyThrows
     @Override
     public void setPreferred(String username, String method){
         try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement("INSERT INTO " + TABLE_AUTH_METHODS + " (username, verified, preferred) VALUES (?,?,?) ON DUPLICATE KEY UPDATE preferred = ?");
+            var st = connection.prepareStatement("INSERT INTO " + TABLE_AUTH_METHODS + " (username, preferred) VALUES (?,?) ON DUPLICATE KEY UPDATE preferred = ?");
             st.setString(1, username);
-            st.setString(2, "");
+            st.setString(2, method);
             st.setString(3, method);
-            st.setString(4, method);
             st.execute();
         }
     }
 
-    @SneakyThrows
-    @Override
-    public void addAuthMethod(String username, String method) { // it is assumed that user is already created
-        try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement("UPDATE " + TABLE_AUTH_METHODS + " SET verified = CONCAT(COALESCE(verified, ''), ?) WHERE username =?");
-            st.setString(1, "," + method);
-            st.setString(2, username);
-            st.execute();
-        }
-    }
-
-    @SneakyThrows
-    @Override
-    public List<String> getAuthMethods(String username) {
-        try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement("SELECT verified FROM " + TABLE_AUTH_METHODS + " WHERE username =?");
-            st.setString(1, username);
-            var rs = st.executeQuery();
-            if (rs.next()) {
-                var verified = rs.getString("verified");
-                if (verified == null || verified.isEmpty()) {
-                    return List.of();
-                } else {
-                    return List.of(verified.substring(1).split(","));
-                }
-            } else {
-                return List.of();
-            }
-        }
-    }
     @SneakyThrows
     @Override
     public String getPreferredMethod(String username) {

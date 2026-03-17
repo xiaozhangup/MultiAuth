@@ -37,7 +37,6 @@ public class EventListener {
 
             LoginSession session = new LoginSession(username, uuid);
             LoginSession.getSessionMap().put(username, session);
-
             event.setResult(PreLoginEvent.PreLoginComponentResult.forceOnlineMode());
 
             if (Config.getBoolean("log.pre-login"))
