@@ -268,7 +268,7 @@ public class AdminCommandHandler implements SimpleCommand {
     @Override
     public List<String> suggest(final @Nonnull Invocation invocation) {
         if(invocation.arguments().length<=1)
-            return List.of("reload", "profile", "whitelist", "migrate");
+            return List.of("reload", "profile", "whitelist");
         else if(invocation.arguments().length == 2){
             return switch (invocation.arguments()[0]){
                 case "profile" -> List.of("create", "set", "rename", "info");
