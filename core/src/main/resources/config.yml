@@ -5,7 +5,7 @@ authentication:
   yggdrasil:
     # If true, the plugin will verify the player's IP address when authenticating with Yggdrasil.
     # Make sure that either there are no proxy before velocity or HAProxy is on.
-    verify-ip: true
+    verify-ip: false
 
     # Enabled session servers for Yggdrasil authentication.
     auth-servers:
@@ -17,7 +17,8 @@ authentication:
       # Players who have previously logged in (have an existing database record) are always allowed.
       # New players without a record must be added to the whitelist via:
       #   /multiauth whitelist add <auth_method> <player>
-      enabled-for: []
+      enabled-for:
+        - littleskin
 
   # Database connection settings for storing UUID and authentication method data.
   mysql:
@@ -28,7 +29,7 @@ authentication:
     password: ""
     # Typical recommended value:
     # "useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
-    parameters: ""
+    parameters: "useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
 
 prefix: # Used for placeholder/TAB integration. Use %multiauth-auth-tag% in TAB to display.
   mojang: "<green>Online"

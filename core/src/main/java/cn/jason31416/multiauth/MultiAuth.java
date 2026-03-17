@@ -46,10 +46,6 @@ public class MultiAuth implements MultiAuthApi {
     @Getter
     private final File dataDirectory;
 
-    public static Scheduler getScheduler() {
-        return instance.proxy.getScheduler();
-    }
-
     @SneakyThrows
     public void init() {
         if(!dataDirectory.exists()) dataDirectory.mkdirs();
