@@ -35,6 +35,10 @@ public class Message {
         return MiniMessage.miniMessage().deserialize(finalMessage);
     }
 
+    public Component toRawComponent() {
+        return MiniMessage.miniMessage().deserialize(content);
+    }
+
     public String toFormatted() {
         return MiniMessage.miniMessage().serialize(toComponent());
     }
