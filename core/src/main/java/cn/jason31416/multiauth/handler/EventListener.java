@@ -58,6 +58,7 @@ public class EventListener {
     public void onGameProfileRequest(GameProfileRequestEvent event) {
         LoginSession session = LoginSession.getSessionMap().get(event.getUsername());
         if (session == null) {
+            Logger.warn("Failed to find login session for " + event.getUsername() + ".");
             return;
         }
 
@@ -66,13 +67,16 @@ public class EventListener {
             // Online / Yggdrasil-authenticated player.
             String yggdrasilName = event.getOriginalProfile().getName();
             String authMethod = session.getAuthMethod();
-            if (authMethod == null) authMethod = "unknown";
+            if (authMethod == null) {
+                Logger.warn("Failed to find authentication method for " + yggdrasilName + " (" + authenticatedUuid + ").");
+                return;
+            }
 
             Profile profile;
             try {
                 profile = DatabaseHandler.getInstance().getOrCreateProfileForLogin(authMethod, authenticatedUuid, yggdrasilName);
             } catch (Exception e) {
-                Logger.warn("Failed to get/create profile for " + yggdrasilName + ": " + e.getMessage());
+                Logger.warn("Failed to get/create profile for " + yggdrasilName + " (" + authMethod + "): " + e.getMessage());
                 event.setGameProfile(new GameProfile(authenticatedUuid, yggdrasilName, event.getOriginalProfile().getProperties()));
                 return;
             }
@@ -86,7 +90,7 @@ public class EventListener {
         try {
             offlineProfile = DatabaseHandler.getInstance().getOrCreateProfileForLogin("offline", offlineUuid, event.getUsername());
         } catch (Exception e) {
-            Logger.warn("Failed to get/create profile for offline player " + event.getUsername() + ": " + e.getMessage());
+            Logger.warn("Failed to get/create profile for offline player " + event.getUsername() + " (offline): " + e.getMessage());
             event.setGameProfile(event.getOriginalProfile().withId(offlineUuid));
             return;
         }
