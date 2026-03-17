@@ -3,6 +3,7 @@ package cn.jason31416.multiauth.command;
 import cn.jason31416.multiauth.MultiAuth;
 import cn.jason31416.multiauth.api.Profile;
 import cn.jason31416.multiauth.handler.DatabaseHandler;
+import cn.jason31416.multiauth.handler.Whitelist;
 import cn.jason31416.multiauth.message.Message;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
@@ -34,6 +35,9 @@ public class AdminCommandHandler implements SimpleCommand {
             }
             case "profile" -> {
                 handleProfileCommand(invocation);
+            }
+            case "whitelist" -> {
+                handleWhitelistCommand(invocation);
             }
             case "" -> {
                 invocation.source().sendMessage(new Message("<green>Running <aqua><bold>AuthX v2</bold></aqua> by Jason31416!").toComponent());
@@ -166,13 +170,82 @@ public class AdminCommandHandler implements SimpleCommand {
         }
     }
 
+    private void handleWhitelistCommand(SimpleCommand.Invocation invocation) {
+        if (invocation.arguments().length < 2) {
+            invocation.source().sendMessage(Message.getMessage("command.whitelist.invalid-format").toComponent());
+            return;
+        }
+        String sub = invocation.arguments()[1];
+        switch (sub) {
+            case "add" -> {
+                // /multiauth whitelist add <auth_method> <player>
+                if (invocation.arguments().length < 4) {
+                    invocation.source().sendMessage(Message.getMessage("command.whitelist.add.invalid-format").toComponent());
+                    return;
+                }
+                String authMethod = invocation.arguments()[2];
+                String playerName = invocation.arguments()[3];
+                Whitelist.getInstance().addPlayer(authMethod, playerName);
+                invocation.source().sendMessage(Message.getMessage("command.whitelist.add.success")
+                        .add("player", playerName)
+                        .add("auth_method", authMethod)
+                        .toComponent());
+            }
+            case "remove" -> {
+                // /multiauth whitelist remove <auth_method> <player>
+                if (invocation.arguments().length < 4) {
+                    invocation.source().sendMessage(Message.getMessage("command.whitelist.remove.invalid-format").toComponent());
+                    return;
+                }
+                String authMethod = invocation.arguments()[2];
+                String playerName = invocation.arguments()[3];
+                boolean removed = Whitelist.getInstance().removePlayer(authMethod, playerName);
+                if (removed) {
+                    invocation.source().sendMessage(Message.getMessage("command.whitelist.remove.success")
+                            .add("player", playerName)
+                            .add("auth_method", authMethod)
+                            .toComponent());
+                } else {
+                    invocation.source().sendMessage(Message.getMessage("command.whitelist.remove.not-found")
+                            .add("player", playerName)
+                            .add("auth_method", authMethod)
+                            .toComponent());
+                }
+            }
+            case "list" -> {
+                // /multiauth whitelist list <auth_method>
+                if (invocation.arguments().length < 3) {
+                    invocation.source().sendMessage(Message.getMessage("command.whitelist.list.invalid-format").toComponent());
+                    return;
+                }
+                String authMethod = invocation.arguments()[2];
+                java.util.Set<String> players = Whitelist.getInstance().getPlayers(authMethod);
+                if (players.isEmpty()) {
+                    invocation.source().sendMessage(Message.getMessage("command.whitelist.list.empty")
+                            .add("auth_method", authMethod)
+                            .toComponent());
+                } else {
+                    invocation.source().sendMessage(Message.getMessage("command.whitelist.list.header")
+                            .add("auth_method", authMethod)
+                            .add("count", String.valueOf(players.size()))
+                            .toComponent());
+                    invocation.source().sendMessage(new Message(String.join(", ", players)).toComponent());
+                }
+            }
+            default -> {
+                invocation.source().sendMessage(Message.getMessage("command.whitelist.invalid-format").toComponent());
+            }
+        }
+    }
+
     @Override
     public List<String> suggest(final @Nonnull Invocation invocation) {
         if(invocation.arguments().length<=1)
-            return List.of("reload", "profile");
+            return List.of("reload", "profile", "whitelist");
         else if(invocation.arguments().length == 2){
             return switch (invocation.arguments()[0]){
                 case "profile" -> List.of("create", "set", "rename", "info");
+                case "whitelist" -> List.of("add", "remove", "list");
                 default -> List.of();
             };
         } else if (invocation.arguments().length == 3) {
@@ -183,6 +256,10 @@ public class AdminCommandHandler implements SimpleCommand {
                     case "rename", "info" -> List.of(Message.getMessage("tab-complete.profile.id").toString());
                     default -> List.of();
                 };
+                case "whitelist" -> switch (invocation.arguments()[1]) {
+                    case "add", "remove", "list" -> List.of(Message.getMessage("tab-complete.profile.auth-method").toString());
+                    default -> List.of();
+                };
                 default -> List.of();
             };
         } else if (invocation.arguments().length == 4) {
@@ -190,6 +267,10 @@ public class AdminCommandHandler implements SimpleCommand {
                 case "profile" -> switch (invocation.arguments()[1]) {
                     case "set" -> List.of(Message.getMessage("tab-complete.profile.login-uuid").toString());
                     case "rename" -> List.of(Message.getMessage("tab-complete.profile.name").toString());
+                    default -> List.of();
+                };
+                case "whitelist" -> switch (invocation.arguments()[1]) {
+                    case "add", "remove" -> List.of(Message.getMessage("tab-complete.whitelist.player").toString());
                     default -> List.of();
                 };
                 default -> List.of();

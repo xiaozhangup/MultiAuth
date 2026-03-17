@@ -2,6 +2,7 @@ auth:
   invalid-session: "<red>Invalid session! Please log in again."
   invalid-username: "<red>Invalid username! Please avoid using weird characters."
   unknown-error: "<red>Unknown error! Please contact an administrator and try again."
+  whitelist-denied: "<red>You are not whitelisted on this server!"
 
   failed-to-login: "<red>Login verification system error, please contact an administrator!"
 
@@ -13,6 +14,8 @@ tab-complete:
     id: "<profile-id>"
     auth-method: "<auth-method>"
     login-uuid: "<login-uuid>"
+  whitelist:
+    player: "<player>"
 
 command:
   default: "<red>Unknown subcommand!"
@@ -43,3 +46,17 @@ command:
       invalid-format: "<red>Incorrect format! Use <yellow>/multiauth profile info <profile_id>"
       invalid-id: "<red>Invalid profile ID!"
       result: "<green>Profile <aqua>#%id%</aqua> | Name: <aqua>%name%</aqua> | UUID: <aqua>%uuid%</aqua>"
+
+  whitelist:
+    invalid-format: "<red>Incorrect format! Use <yellow>/multiauth whitelist <add|remove|list>"
+    add:
+      invalid-format: "<red>Incorrect format! Use <yellow>/multiauth whitelist add <auth_method> <player>"
+      success: "<green>Player <aqua>%player%</aqua> has been added to the whitelist for <aqua>%auth_method%</aqua>"
+    remove:
+      invalid-format: "<red>Incorrect format! Use <yellow>/multiauth whitelist remove <auth_method> <player>"
+      success: "<green>Player <aqua>%player%</aqua> has been removed from the whitelist for <aqua>%auth_method%</aqua>"
+      not-found: "<red>Player <aqua>%player%</aqua> is not on the whitelist for <aqua>%auth_method%</aqua>"
+    list:
+      invalid-format: "<red>Incorrect format! Use <yellow>/multiauth whitelist list <auth_method>"
+      header: "<green>Whitelist for <aqua>%auth_method%</aqua> (<aqua>%count%</aqua> players):"
+      empty: "<yellow>The whitelist for <aqua>%auth_method%</aqua> is empty."

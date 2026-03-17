@@ -5,7 +5,9 @@ This file contains partial code from the MultiLogin project
 package cn.jason31416.multiauth.injection;
 
 import cn.jason31416.multiauth.MultiAuth;
+import cn.jason31416.multiauth.handler.DatabaseHandler;
 import cn.jason31416.multiauth.handler.LoginSession;
+import cn.jason31416.multiauth.handler.Whitelist;
 import cn.jason31416.multiauth.handler.YggdrasilAuthenticator;
 import cn.jason31416.multiauth.injection.accessor.Accessor;
 import cn.jason31416.multiauth.injection.accessor.EnumAccessor;
@@ -280,6 +282,19 @@ public class XLoginSessionHandler {
                                 Logger.error("Invalid UUID from Yggdrasil for " + username + ": " + rawId);
                                 this.inbound.disconnect(Message.getMessage("authentication.invalid-session").toComponent());
                                 return;
+                            }
+                            // Whitelist check: only applies to new players on whitelist-enabled auth methods.
+                            String authMethod = playerProfile.authentication;
+                            java.util.List<String> whitelistEnabledFor = Config.getConfigTree()
+                                    .getStringList("authentication.yggdrasil.whitelist.enabled-for");
+                            if (whitelistEnabledFor.contains(authMethod)) {
+                                cn.jason31416.multiauth.api.Profile existingProfile =
+                                        DatabaseHandler.getInstance().getProfileByLogin(authMethod, yggdrasilUuid);
+                                if (existingProfile == null
+                                        && !Whitelist.getInstance().isWhitelisted(authMethod, playerProfile.name)) {
+                                    this.inbound.disconnect(Message.getMessage("auth.whitelist-denied").toComponent());
+                                    return;
+                                }
                             }
                             List<GameProfile.Property> props = new ArrayList<>();
                             if (playerProfile.properties != null) {
