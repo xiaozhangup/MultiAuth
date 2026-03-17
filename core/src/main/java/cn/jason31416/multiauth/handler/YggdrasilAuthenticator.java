@@ -58,7 +58,7 @@ public class YggdrasilAuthenticator {
         try {
             String preferredMethod = DatabaseHandler.getInstance().getPreferredMethod(username);
             if (preferredMethod != null && !preferredMethod.isEmpty() && authServers.contains(preferredMethod)) {
-                String url = buildAuthenticationUrl(authServers.get(preferredMethod), username, serverID, ip);
+                String url = buildAuthenticationUrl(authServers.getString(preferredMethod), username, serverID, ip);
                 PlayerProfile preferred = authenticateVia(username, preferredMethod, url);
                 if (preferred != null) {
                     return preferred;
@@ -70,7 +70,7 @@ public class YggdrasilAuthenticator {
             List<Thread> threads = new ArrayList<>();
             for (String method : authServers.getKeys()) {
                 if (!method.equals(preferredMethod)) {
-                    String url1 = buildAuthenticationUrl(authServers.get(method), username, serverID, ip);
+                    String url1 = buildAuthenticationUrl(authServers.getString(method), username, serverID, ip);
                     PlayerProfile[] slot = {null};
                     slots.add(slot);
                     threads.add(Thread.ofVirtual().start(() -> slot[0] = authenticateVia(username, method, url1)));

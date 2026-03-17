@@ -16,7 +16,7 @@ import java.util.UUID;
 
 public class DatabaseHandler implements IDatabaseHandler {
     @Getter
-    private static final DatabaseHandler instance=new DatabaseHandler();
+    private static final DatabaseHandler instance = new DatabaseHandler();
 
     public static final String TABLE_AUTH_METHODS = "multiauth_authmethods";
     public static final String TABLE_PROFILES = "multiauth_profiles";
@@ -31,14 +31,36 @@ public class DatabaseHandler implements IDatabaseHandler {
 
     @SneakyThrows
     public void init() {
-        if(dataSource!= null&&!dataSource.isClosed()) dataSource.close();
+        if (dataSource != null && !dataSource.isClosed()) dataSource.close();
 
         dataSource = new HikariDataSource(buildDataSourceConfig());
 
-        try (Connection connection = getConnection()) {
-            connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_AUTH_METHODS + " (username VARCHAR(255) PRIMARY KEY, preferred VARCHAR(255))").execute();
-            connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_PROFILES + " (id INT NOT NULL AUTO_INCREMENT, uuid VARCHAR(36) NOT NULL UNIQUE, name VARCHAR(255) NOT NULL, PRIMARY KEY (id))").execute();
-            connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_LOGIN_PROFILE + " (auth_method VARCHAR(255) NOT NULL, login_uuid VARCHAR(36) NOT NULL, profile_id INT NOT NULL, original_profile_id INT NOT NULL, PRIMARY KEY (auth_method, login_uuid))").execute();
+        try (
+                Connection connection = getConnection();
+                Statement st = connection.createStatement()
+        ) {
+            st.execute("""
+                    CREATE TABLE IF NOT EXISTS %s (
+                        username VARCHAR(255) PRIMARY KEY,
+                        preferred VARCHAR(255)
+                    )""".formatted(TABLE_AUTH_METHODS));
+
+            st.execute("""
+                    CREATE TABLE IF NOT EXISTS %s (
+                        id INT NOT NULL AUTO_INCREMENT,
+                        uuid VARCHAR(36) NOT NULL UNIQUE,
+                        name VARCHAR(255) NOT NULL,
+                        PRIMARY KEY (id)
+                    )""".formatted(TABLE_PROFILES));
+
+            st.execute("""
+                    CREATE TABLE IF NOT EXISTS %s (
+                        auth_method VARCHAR(255) NOT NULL,
+                        login_uuid VARCHAR(36) NOT NULL,
+                        profile_id INT NOT NULL,
+                        original_profile_id INT NOT NULL,
+                        PRIMARY KEY (auth_method, login_uuid)
+                    )""".formatted(TABLE_LOGIN_PROFILE));
         }
     }
 
@@ -52,16 +74,14 @@ public class DatabaseHandler implements IDatabaseHandler {
         String parameters = Config.getString("authentication.mysql.parameters");
 
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        StringBuilder url = new StringBuilder("jdbc:mysql://")
-                .append(host.isEmpty() ? "localhost" : host)
-                .append(":")
-                .append(port <= 0 ? 3306 : port)
-                .append("/")
-                .append(database.isEmpty() ? "multiauth" : database);
-        if (!parameters.isEmpty()) {
-            url.append("?").append(parameters);
-        }
-        config.setJdbcUrl(url.toString());
+        String url = "jdbc:mysql://%s:%d/%s%s".formatted(
+                host.isBlank() ? "localhost" : host,
+                port <= 0 ? 3306 : port,
+                database.isBlank() ? "multiauth" : database,
+                parameters.isBlank() ? "" : "?" + parameters
+        );
+
+        config.setJdbcUrl(url);
         config.setUsername(username);
         config.setPassword(password);
         return config;
@@ -69,10 +89,13 @@ public class DatabaseHandler implements IDatabaseHandler {
 
     @Override
     public int createProfile(UUID uuid, String name) throws SQLException {
-        try (Connection connection = getConnection();
-             var st = connection.prepareStatement(
-                    "INSERT INTO " + TABLE_PROFILES + " (uuid, name) VALUES (?, ?)",
-                    Statement.RETURN_GENERATED_KEYS)) {
+        try (
+                Connection connection = getConnection();
+                var st = connection.prepareStatement(
+                        "INSERT INTO %s (uuid, name) VALUES (?, ?)".formatted(TABLE_PROFILES),
+                        Statement.RETURN_GENERATED_KEYS
+                )
+        ) {
             st.setString(1, uuid.toString());
             st.setString(2, name);
             st.execute();
@@ -89,15 +112,21 @@ public class DatabaseHandler implements IDatabaseHandler {
     @Override
     @Nullable
     public Profile getProfileById(int id) {
-        try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement(
-                    "SELECT id, uuid, name FROM " + TABLE_PROFILES + " WHERE id = ?");
+        try (
+                Connection connection = getConnection();
+                var st = connection.prepareStatement("SELECT id, uuid, name FROM %s WHERE id = ?".formatted(TABLE_PROFILES))
+        ) {
             st.setInt(1, id);
-            var rs = st.executeQuery();
-            if (rs.next()) {
-                return new Profile(rs.getInt("id"), UUID.fromString(rs.getString("uuid")), rs.getString("name"));
+            try (var rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return new Profile(
+                            rs.getInt("id"),
+                            UUID.fromString(rs.getString("uuid")),
+                            rs.getString("name")
+                    );
+                }
+                return null;
             }
-            return null;
         }
     }
 
@@ -105,18 +134,27 @@ public class DatabaseHandler implements IDatabaseHandler {
     @Override
     @Nullable
     public Profile getProfileByLogin(String authMethod, UUID loginUuid) {
-        try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement(
-                    "SELECT p.id, p.uuid, p.name FROM " + TABLE_PROFILES + " p " +
-                    "INNER JOIN " + TABLE_LOGIN_PROFILE + " lp ON p.id = lp.profile_id " +
-                    "WHERE lp.auth_method = ? AND lp.login_uuid = ?");
+        try (
+                Connection connection = getConnection();
+                var st = connection.prepareStatement("""
+                        SELECT p.id, p.uuid, p.name
+                        FROM %s p
+                        INNER JOIN %s lp ON p.id = lp.profile_id
+                        WHERE lp.auth_method = ? AND lp.login_uuid = ?
+                        """.formatted(TABLE_PROFILES, TABLE_LOGIN_PROFILE))
+        ) {
             st.setString(1, authMethod);
             st.setString(2, loginUuid.toString());
-            var rs = st.executeQuery();
-            if (rs.next()) {
-                return new Profile(rs.getInt("id"), UUID.fromString(rs.getString("uuid")), rs.getString("name"));
+            try (var rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return new Profile(
+                            rs.getInt("id"),
+                            UUID.fromString(rs.getString("uuid")),
+                            rs.getString("name")
+                    );
+                }
+                return null;
             }
-            return null;
         }
     }
 
@@ -132,9 +170,12 @@ public class DatabaseHandler implements IDatabaseHandler {
             try {
                 String resolvedName = resolveUniqueProfileName(connection, name);
 
-                try (var st = connection.prepareStatement(
-                        "INSERT INTO " + TABLE_PROFILES + " (uuid, name) VALUES (?, ?)",
-                        Statement.RETURN_GENERATED_KEYS)) {
+                try (
+                        var st = connection.prepareStatement(
+                                "INSERT INTO %s (uuid, name) VALUES (?, ?)".formatted(TABLE_PROFILES),
+                                Statement.RETURN_GENERATED_KEYS
+                        )
+                ) {
                     st.setString(1, loginUuid.toString());
                     st.setString(2, resolvedName);
                     st.execute();
@@ -144,9 +185,11 @@ public class DatabaseHandler implements IDatabaseHandler {
                         }
                         int profileId = rs.getInt(1);
 
-                        try (var st2 = connection.prepareStatement(
-                                "INSERT INTO " + TABLE_LOGIN_PROFILE + " (auth_method, login_uuid, profile_id, original_profile_id) VALUES (?, ?, ?, ?) " +
-                                "ON DUPLICATE KEY UPDATE profile_id = ?, original_profile_id = original_profile_id")) {
+                        try (var st2 = connection.prepareStatement("""
+                                INSERT INTO %s (auth_method, login_uuid, profile_id, original_profile_id)
+                                VALUES (?, ?, ?, ?)
+                                ON DUPLICATE KEY UPDATE profile_id = ?, original_profile_id = original_profile_id
+                                """.formatted(TABLE_LOGIN_PROFILE))) {
                             st2.setString(1, authMethod);
                             st2.setString(2, loginUuid.toString());
                             st2.setInt(3, profileId);
@@ -176,9 +219,7 @@ public class DatabaseHandler implements IDatabaseHandler {
         }
     }
 
-    /** Returns true if the given SQLException represents a unique/duplicate-key constraint violation. */
     private static boolean isDuplicateKeyException(SQLException e) {
-        // MySQL error code 1062 = Duplicate entry; SQLState 23000 = integrity constraint violation
         return e.getErrorCode() == 1062 || "23000".equals(e.getSQLState());
     }
 
@@ -186,8 +227,7 @@ public class DatabaseHandler implements IDatabaseHandler {
         String candidate = baseName;
         int maxAttempts = 4;
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
-            try (var st = connection.prepareStatement(
-                    "SELECT 1 FROM " + TABLE_PROFILES + " WHERE name = ? LIMIT 1")) {
+            try (var st = connection.prepareStatement("SELECT 1 FROM %s WHERE name = ? LIMIT 1".formatted(TABLE_PROFILES))) {
                 st.setString(1, candidate);
                 try (var rs = st.executeQuery()) {
                     if (!rs.next()) {
@@ -197,23 +237,24 @@ public class DatabaseHandler implements IDatabaseHandler {
             }
             candidate = baseName + "_".repeat(attempt + 1);
         }
-        // Fallback: append a short UUID fragment to guarantee uniqueness
         return baseName + "_" + UUID.randomUUID().toString().substring(0, 3);
     }
 
     @SneakyThrows
     @Nullable
     public Integer getOriginalProfileId(String authMethod, UUID loginUuid) {
-        try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement(
-                    "SELECT original_profile_id FROM " + TABLE_LOGIN_PROFILE + " WHERE auth_method = ? AND login_uuid = ?");
+        try (
+                Connection connection = getConnection();
+                var st = connection.prepareStatement("SELECT original_profile_id FROM %s WHERE auth_method = ? AND login_uuid = ?".formatted(TABLE_LOGIN_PROFILE))
+        ) {
             st.setString(1, authMethod);
             st.setString(2, loginUuid.toString());
-            var rs = st.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("original_profile_id");
+            try (var rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("original_profile_id");
+                }
+                return null;
             }
-            return null;
         }
     }
 
@@ -225,10 +266,14 @@ public class DatabaseHandler implements IDatabaseHandler {
 
     @SneakyThrows
     public void setLoginProfileWithOriginalId(String authMethod, UUID loginUuid, int profileId, int originalProfileId) {
-        try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement(
-                    "INSERT INTO " + TABLE_LOGIN_PROFILE + " (auth_method, login_uuid, profile_id, original_profile_id) VALUES (?, ?, ?, ?) " +
-                    "ON DUPLICATE KEY UPDATE profile_id = ?, original_profile_id = original_profile_id");
+        try (
+                Connection connection = getConnection();
+                var st = connection.prepareStatement("""
+                        INSERT INTO %s (auth_method, login_uuid, profile_id, original_profile_id)
+                        VALUES (?, ?, ?, ?)
+                        ON DUPLICATE KEY UPDATE profile_id = ?, original_profile_id = original_profile_id
+                        """.formatted(TABLE_LOGIN_PROFILE))
+        ) {
             st.setString(1, authMethod);
             st.setString(2, loginUuid.toString());
             st.setInt(3, profileId);
@@ -241,9 +286,10 @@ public class DatabaseHandler implements IDatabaseHandler {
     @SneakyThrows
     @Override
     public void setProfileName(int id, String name) {
-        try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement(
-                    "UPDATE " + TABLE_PROFILES + " SET name = ? WHERE id = ?");
+        try (
+                Connection connection = getConnection();
+                var st = connection.prepareStatement("UPDATE %s SET name = ? WHERE id = ?".formatted(TABLE_PROFILES))
+        ) {
             st.setString(1, name);
             st.setInt(2, id);
             st.execute();
@@ -252,9 +298,14 @@ public class DatabaseHandler implements IDatabaseHandler {
 
     @SneakyThrows
     @Override
-    public void setPreferred(String username, String method){
-        try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement("INSERT INTO " + TABLE_AUTH_METHODS + " (username, preferred) VALUES (?,?) ON DUPLICATE KEY UPDATE preferred = ?");
+    public void setPreferred(String username, String method) {
+        try (
+                Connection connection = getConnection();
+                var st = connection.prepareStatement("""
+                        INSERT INTO %s (username, preferred) VALUES (?, ?)
+                        ON DUPLICATE KEY UPDATE preferred = ?
+                        """.formatted(TABLE_AUTH_METHODS))
+        ) {
             st.setString(1, username);
             st.setString(2, method);
             st.setString(3, method);
@@ -265,14 +316,17 @@ public class DatabaseHandler implements IDatabaseHandler {
     @SneakyThrows
     @Override
     public String getPreferredMethod(String username) {
-        try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement("SELECT preferred FROM " + TABLE_AUTH_METHODS + " WHERE username =?");
+        try (
+                Connection connection = getConnection();
+                var st = connection.prepareStatement("SELECT preferred FROM %s WHERE username = ?".formatted(TABLE_AUTH_METHODS))
+        ) {
             st.setString(1, username);
-            var rs = st.executeQuery();
-            if (rs.next()) {
-                return rs.getString("preferred");
-            } else {
-                return null;
+            try (var rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("preferred");
+                } else {
+                    return null;
+                }
             }
         }
     }
