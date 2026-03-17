@@ -1,10 +1,10 @@
 auth:
-  invalid-session: "<red>Invalid session! Please log in again."
-  invalid-username: "<red>Invalid username! Please avoid using weird characters."
-  unknown-error: "<red>Unknown error! Please contact an administrator and try again."
-  whitelist-denied: "<red>You are not whitelisted on this server!"
+  invalid-session: "Invalid session! Please log in again."
+  invalid-username: "Invalid username! Please avoid using weird characters."
+  unknown-error: "Unknown error! Please contact an administrator and try again."
+  whitelist-denied: "You are not whitelisted on this server!"
 
-  failed-to-login: "<red>Login verification system error, please contact an administrator!"
+  failed-to-login: "Login verification system error, please contact an administrator!"
 
 tab-complete:
   force-change-password:
@@ -18,45 +18,45 @@ tab-complete:
     player: "<player>"
 
 command:
-  default: "<red>Unknown subcommand!"
-  no-permission: "<red>You do not have permission to execute this command!"
+  default: "Unknown subcommand!"
+  no-permission: "You do not have permission to execute this command!"
 
-  player-not-exists: "<red>The player %player% does not exist!"
+  player-not-exists: "The player %player% does not exist!"
 
   reload:
-    success: "<green>Successfully reloaded <aqua>AuthX<green>!"
+    success: "Successfully reloaded AuthX!"
 
   profile:
-    invalid-format: "<red>Incorrect format! Use <yellow>/multiauth profile <create|set|rename|info>"
-    not-found: "<red>Profile #%id% does not exist!"
+    invalid-format: "Incorrect format! Use /multiauth profile <create|set|rename|info>"
+    not-found: "Profile #%id% does not exist!"
     create:
-      invalid-format: "<red>Incorrect format! Use <yellow>/multiauth profile create <name>"
-      success: "<green>Created profile <aqua>#%id%</aqua>, name: <aqua>%name%</aqua>, UUID: <aqua>%uuid%</aqua>"
-      failed: "<red>Failed to create profile: %error%"
+      invalid-format: "Incorrect format! Use /multiauth profile create <name>"
+      success: "Created profile #%id%, name: %name%, UUID: %uuid%"
+      failed: "Failed to create profile: %error%"
     set:
-      invalid-format: "<red>Incorrect format! Use <yellow>/multiauth profile set <auth_method> <login_uuid> <profile_id>"
-      invalid-uuid: "<red>Invalid UUID format!"
-      invalid-id: "<red>Invalid profile ID!"
-      success: "<green>Login <aqua>%auth_method%/%login_uuid%</aqua> is now mapped to profile <aqua>#%id%</aqua>"
+      invalid-format: "Incorrect format! Use /multiauth profile set <auth_method> <login_uuid> <profile_id>"
+      invalid-uuid: "Invalid UUID format!"
+      invalid-id: "Invalid profile ID!"
+      success: "Login %auth_method%/%login_uuid% is now mapped to profile #%id%"
     rename:
-      invalid-format: "<red>Incorrect format! Use <yellow>/multiauth profile rename <profile_id> <new_name>"
-      invalid-id: "<red>Invalid profile ID!"
-      success: "<green>Profile <aqua>#%id%</aqua> has been renamed to <aqua>%name%</aqua>"
+      invalid-format: "Incorrect format! Use /multiauth profile rename <profile_id> <new_name>"
+      invalid-id: "Invalid profile ID!"
+      success: "Profile #%id% has been renamed to %name%"
     info:
-      invalid-format: "<red>Incorrect format! Use <yellow>/multiauth profile info <profile_id>"
-      invalid-id: "<red>Invalid profile ID!"
-      result: "<green>Profile <aqua>#%id%</aqua> | Name: <aqua>%name%</aqua> | UUID: <aqua>%uuid%</aqua>"
+      invalid-format: "Incorrect format! Use /multiauth profile info <profile_id>"
+      invalid-id: "Invalid profile ID!"
+      result: "Profile #%id% | Name: %name% | UUID: %uuid%"
 
   whitelist:
-    invalid-format: "<red>Incorrect format! Use <yellow>/multiauth whitelist <add|remove|list>"
+    invalid-format: "Incorrect format! Use /multiauth whitelist <add|remove|list>"
     add:
-      invalid-format: "<red>Incorrect format! Use <yellow>/multiauth whitelist add <auth_method> <player>"
-      success: "<green>Player <aqua>%player%</aqua> has been added to the whitelist for <aqua>%auth_method%</aqua>"
+      invalid-format: "Incorrect format! Use /multiauth whitelist add <auth_method> <player>"
+      success: "Player %player% has been added to the whitelist for %auth_method%"
     remove:
-      invalid-format: "<red>Incorrect format! Use <yellow>/multiauth whitelist remove <auth_method> <player>"
-      success: "<green>Player <aqua>%player%</aqua> has been removed from the whitelist for <aqua>%auth_method%</aqua>"
-      not-found: "<red>Player <aqua>%player%</aqua> is not on the whitelist for <aqua>%auth_method%</aqua>"
+      invalid-format: "Incorrect format! Use /multiauth whitelist remove <auth_method> <player>"
+      success: "Player %player% has been removed from the whitelist for %auth_method%"
+      not-found: "Player %player% is not on the whitelist for %auth_method%"
     list:
-      invalid-format: "<red>Incorrect format! Use <yellow>/multiauth whitelist list <auth_method>"
-      header: "<green>Whitelist for <aqua>%auth_method%</aqua> (<aqua>%count%</aqua> players):"
-      empty: "<yellow>The whitelist for <aqua>%auth_method%</aqua> is empty."
+      invalid-format: "Incorrect format! Use /multiauth whitelist list <auth_method>"
+      header: "Whitelist for %auth_method% (%count% players):"
+      empty: "The whitelist for %auth_method% is empty."

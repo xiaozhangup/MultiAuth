@@ -11,7 +11,6 @@ public class Whitelist {
     @Getter
     private static final Whitelist instance = new Whitelist();
 
-    // authMethod -> set of whitelisted player names (case-insensitive via lowercase keys)
     private final Map<String, Set<String>> whitelist = new ConcurrentHashMap<>();
 
     public void addPlayer(String authMethod, String playerName) {

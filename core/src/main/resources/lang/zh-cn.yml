@@ -1,10 +1,10 @@
 auth:
-  invalid-session: "<red>无效的会话! 请重新登录"
-  invalid-username: "<red>用户名不符合规范! 请使用英文字符与数字组合作为用户名!"
-  unknown-error: "<red>未知错误! 请联系管理员并重试"
-  whitelist-denied: "<red>你不在该服务器的白名单中!"
+  invalid-session: "无效的会话! 请重新登录"
+  invalid-username: "用户名不符合规范! 请使用英文字符与数字组合作为用户名!"
+  unknown-error: "未知错误! 请联系管理员并重试"
+  whitelist-denied: "你不在该服务器的白名单中!"
 
-  failed-to-login: "<red>登录验证系统出错，请联系管理员!"
+  failed-to-login: "登录验证系统出错，请联系管理员!"
 
 tab-complete:
   force-change-password:
@@ -18,45 +18,45 @@ tab-complete:
     player: "<玩家>"
 
 command:
-  default: "<red>未知的子命令!"
-  no-permission: "<red>你没有权限执行该命令!"
+  default: "未知的子命令!"
+  no-permission: "你没有权限执行该命令!"
 
-  player-not-exists: "<red>玩家 %player% 不存在!"
+  player-not-exists: "玩家 %player% 不存在!"
 
   reload:
-    success: "<green>成功重载了 <aqua>AuthX <green>!"
+    success: "成功重载了 AuthX !"
 
   profile:
-    invalid-format: "<red>错误的格式! 请使用 <yellow>/multiauth profile <create|set|rename|info>"
-    not-found: "<red>档案 #%id% 不存在!"
+    invalid-format: "错误的格式! 请使用 /multiauth profile <create|set|rename|info>"
+    not-found: "档案 #%id% 不存在!"
     create:
-      invalid-format: "<red>错误的格式! 请使用 <yellow>/multiauth profile create <名称>"
-      success: "<green>已创建档案 <aqua>#%id%</aqua>，名称: <aqua>%name%</aqua>，UUID: <aqua>%uuid%</aqua>"
-      failed: "<red>创建档案失败: %error%"
+      invalid-format: "错误的格式! 请使用 /multiauth profile create <名称>"
+      success: "已创建档案 #%id%，名称: %name%，UUID: %uuid%"
+      failed: "创建档案失败: %error%"
     set:
-      invalid-format: "<red>错误的格式! 请使用 <yellow>/multiauth profile set <登录方式> <登录UUID> <档案ID>"
-      invalid-uuid: "<red>无效的 UUID 格式!"
-      invalid-id: "<red>无效的档案 ID!"
-      success: "<green>已将登录 <aqua>%auth_method%/%login_uuid%</aqua> 的档案设置为 <aqua>#%id%</aqua>"
+      invalid-format: "错误的格式! 请使用 /multiauth profile set <登录方式> <登录UUID> <档案ID>"
+      invalid-uuid: "无效的 UUID 格式!"
+      invalid-id: "无效的档案 ID!"
+      success: "已将登录 %auth_method%/%login_uuid% 的档案设置为 #%id%"
     rename:
-      invalid-format: "<red>错误的格式! 请使用 <yellow>/multiauth profile rename <档案ID> <新名称>"
-      invalid-id: "<red>无效的档案 ID!"
-      success: "<green>已将档案 <aqua>#%id%</aqua> 的名称修改为 <aqua>%name%</aqua>"
+      invalid-format: "错误的格式! 请使用 /multiauth profile rename <档案ID> <新名称>"
+      invalid-id: "无效的档案 ID!"
+      success: "已将档案 #%id% 的名称修改为 %name%"
     info:
-      invalid-format: "<red>错误的格式! 请使用 <yellow>/multiauth profile info <档案ID>"
-      invalid-id: "<red>无效的档案 ID!"
-      result: "<green>档案 <aqua>#%id%</aqua> | 名称: <aqua>%name%</aqua> | UUID: <aqua>%uuid%</aqua>"
+      invalid-format: "错误的格式! 请使用 /multiauth profile info <档案ID>"
+      invalid-id: "无效的档案 ID!"
+      result: "档案 #%id% | 名称: %name% | UUID: %uuid%"
 
   whitelist:
-    invalid-format: "<red>错误的格式! 请使用 <yellow>/multiauth whitelist <add|remove|list>"
+    invalid-format: "错误的格式! 请使用 /multiauth whitelist <add|remove|list>"
     add:
-      invalid-format: "<red>错误的格式! 请使用 <yellow>/multiauth whitelist add <登录方式> <玩家>"
-      success: "<green>已将玩家 <aqua>%player%</aqua> 添加到 <aqua>%auth_method%</aqua> 的白名单"
+      invalid-format: "错误的格式! 请使用 /multiauth whitelist add <登录方式> <玩家>"
+      success: "已将玩家 %player% 添加到 %auth_method% 的白名单"
     remove:
-      invalid-format: "<red>错误的格式! 请使用 <yellow>/multiauth whitelist remove <登录方式> <玩家>"
-      success: "<green>已将玩家 <aqua>%player%</aqua> 从 <aqua>%auth_method%</aqua> 的白名单中移除"
-      not-found: "<red>玩家 <aqua>%player%</aqua> 不在 <aqua>%auth_method%</aqua> 的白名单中"
+      invalid-format: "错误的格式! 请使用 /multiauth whitelist remove <登录方式> <玩家>"
+      success: "已将玩家 %player% 从 %auth_method% 的白名单中移除"
+      not-found: "玩家 %player% 不在 %auth_method% 的白名单中"
     list:
-      invalid-format: "<red>错误的格式! 请使用 <yellow>/multiauth whitelist list <登录方式>"
-      header: "<green><aqua>%auth_method%</aqua> 的白名单 (共 <aqua>%count%</aqua> 名玩家):"
-      empty: "<yellow><aqua>%auth_method%</aqua> 的白名单为空"
+      invalid-format: "错误的格式! 请使用 /multiauth whitelist list <登录方式>"
+      header: "%auth_method% 的白名单 (共 %count% 名玩家):"
+      empty: "%auth_method% 的白名单为空"
