@@ -269,7 +269,7 @@ public class XLoginSessionHandler {
                                 }
                             }
                             if (playerProfile == null) { // If authentication failed
-                                this.inbound.disconnect(Message.getMessage("authentication.invalid-session").toComponent());
+                                this.inbound.disconnect(Message.getMessage("authentication.invalid-session").toRawComponent());
                                 return;
                             }
                             // Security: use the UUID and name returned by the Yggdrasil auth server,
@@ -281,7 +281,7 @@ public class XLoginSessionHandler {
                                         UUID.fromString(rawId.replaceFirst(UUID_FORMAT_PATTERN, "$1-$2-$3-$4-$5"));
                             } catch (Exception uuidEx) {
                                 Logger.error("Invalid UUID from Yggdrasil for " + username + ": " + rawId);
-                                this.inbound.disconnect(Message.getMessage("authentication.invalid-session").toComponent());
+                                this.inbound.disconnect(Message.getMessage("authentication.invalid-session").toRawComponent());
                                 return;
                             }
                             // Whitelist check: only applies to new players on whitelist-enabled auth methods.
@@ -292,7 +292,7 @@ public class XLoginSessionHandler {
                                 Profile existingProfile = DatabaseHandler.getInstance().getProfileByLogin(authMethod, yggdrasilUuid);
                                 if (existingProfile == null
                                         && !Whitelist.getInstance().isWhitelisted(authMethod, playerProfile.name)) {
-                                    this.inbound.disconnect(Message.getMessage("auth.whitelist-denied").toComponent());
+                                    this.inbound.disconnect(Message.getMessage("auth.whitelist-denied").toRawComponent());
                                     return;
                                 }
                             }
@@ -328,7 +328,7 @@ public class XLoginSessionHandler {
                     } catch (Throwable e) {
                         Logger.error("An exception occurred while processing validation results. "+e.getMessage());
                         if (encrypted) {
-                            inbound.disconnect(Message.getMessage("sessionhandler.internal-error").toComponent());
+                            inbound.disconnect(Message.getMessage("sessionhandler.internal-error").toRawComponent());
                         }
                         mcConnection.close(true);
                     }

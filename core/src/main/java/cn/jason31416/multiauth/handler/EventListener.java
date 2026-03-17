@@ -25,13 +25,13 @@ public class EventListener {
             String username = event.getUsername();
 
             if (!username.matches(Config.getConfigTree().getString("regex.username-regex", ".*"))) {
-                event.setResult(PreLoginEvent.PreLoginComponentResult.denied(Message.getMessage("auth.invalid-username").toComponent()));
+                event.setResult(PreLoginEvent.PreLoginComponentResult.denied(Message.getMessage("auth.invalid-username").toRawComponent()));
                 return;
             }
 
             UUID uuid = event.getUniqueId();
             if (uuid == null) {
-                event.setResult(PreLoginEvent.PreLoginComponentResult.denied(Message.getMessage("auth.failed-to-login").toComponent()));
+                event.setResult(PreLoginEvent.PreLoginComponentResult.denied(Message.getMessage("auth.failed-to-login").toRawComponent()));
                 return;
             }
 
@@ -44,7 +44,7 @@ public class EventListener {
         } catch (Throwable e) {
             Logger.error("Error when prelogin: " + e.getMessage());
             e.printStackTrace();
-            event.setResult(PreLoginEvent.PreLoginComponentResult.denied(Message.getMessage("auth.failed-to-login").toComponent()));
+            event.setResult(PreLoginEvent.PreLoginComponentResult.denied(Message.getMessage("auth.failed-to-login").toRawComponent()));
         }
     }
 
