@@ -12,6 +12,13 @@ authentication:
       mojang: "https://sessionserver.mojang.com/"
       littleskin: "https://littleskin.cn/api/yggdrasil/sessionserver/"
 
+    whitelist:
+      # Specify which auth methods require the in-memory whitelist for new players.
+      # Players who have previously logged in (have an existing database record) are always allowed.
+      # New players without a record must be added to the whitelist via:
+      #   /multiauth whitelist add <auth_method> <player>
+      enabled-for: []
+
   # Database connection settings for storing UUID and authentication method data.
   mysql:
     host: "localhost"
