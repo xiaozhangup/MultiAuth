@@ -6,14 +6,14 @@ import com.velocitypowered.api.util.UuidUtils;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public class LoginSession implements ILoginSession {
     @Getter
-    private static Map<String, LoginSession> sessionMap = new HashMap<>();
+    private static Map<String, LoginSession> sessionMap = new ConcurrentHashMap<>();
 
     private String username;
     private UUID uuid;

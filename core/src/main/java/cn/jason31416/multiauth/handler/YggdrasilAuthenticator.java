@@ -8,72 +8,89 @@ import com.google.gson.Gson;
 import lombok.SneakyThrows;
 
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public class YggdrasilAuthenticator {
 
-    public static CompletableFuture<PlayerProfile> authenticateVia(String username, String authMethod, String url){
-        CompletableFuture<PlayerProfile> future = new CompletableFuture<>();
-        var res = HttpClient.newHttpClient().sendAsync(HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .GET()
-                .build(), HttpResponse.BodyHandlers.ofString());
-        res.thenAccept(response -> {
-            if(response.statusCode() == 200) {
-                var ret = new Gson().fromJson(response.body(), PlayerProfile.class);
+    private static PlayerProfile authenticateVia(String username, String authMethod, String url) {
+        try {
+            HttpResponse<String> response = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(10))
+                    .build()
+                    .send(HttpRequest.newBuilder().uri(URI.create(url)).GET().build(),
+                            HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                PlayerProfile ret = new Gson().fromJson(response.body(), PlayerProfile.class);
                 ret.authentication = authMethod;
                 DatabaseHandler.getInstance().setPreferred(username, authMethod);
                 LoginSession.getSession(username).setAuthMethod(authMethod);
-                future.complete(ret);
-            }else{
-                future.complete(null);
+                return ret;
             }
-        });
-        return future;
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    private static String buildAuthenticationUrl(String baseUrl, String username, String serverID, String ip) {
+        String encoded = baseUrl + "session/minecraft/hasJoined?username="
+                + URLEncoder.encode(username, StandardCharsets.UTF_8)
+                + "&serverId="
+                + URLEncoder.encode(serverID, StandardCharsets.UTF_8);
+        if (Config.getBoolean("authentication.yggdrasil.verify-ip")) {
+            encoded += "&ip=" + URLEncoder.encode(ip, StandardCharsets.UTF_8);
+        }
+        return encoded;
     }
 
     @SneakyThrows
     public static PlayerProfile authenticate(String username, String serverID, String ip) {
-        Logger.info("Authenticating "+username+" "+serverID+" "+ip);
+        if (Config.getBoolean("log.auth-yggdrasil")) {
+            Logger.info("Authenticating " + username);
+        }
         MapTree authServers = Config.getSection("authentication.yggdrasil.auth-servers");
-        try{
+        try {
             String preferredMethod = DatabaseHandler.getInstance().getPreferredMethod(username);
-            if(preferredMethod!=null&&!preferredMethod.isEmpty()&&authServers.contains(preferredMethod)) {
-                String url = authServers.get(preferredMethod) + "session/minecraft/hasJoined?username=" + username + "&serverId=" + serverID;
-                if (Config.getBoolean("authentication.yggdrasil.verify-ip")) url += "&ip=" + ip;
-                var res = authenticateVia(username, preferredMethod, url);
-                if (res.get() != null){
-                    return res.get();
+            if (preferredMethod != null && !preferredMethod.isEmpty() && authServers.contains(preferredMethod)) {
+                String url = buildAuthenticationUrl(authServers.get(preferredMethod), username, serverID, ip);
+                PlayerProfile preferred = authenticateVia(username, preferredMethod, url);
+                if (preferred != null) {
+                    return preferred;
                 }
             }
-            List<CompletableFuture<PlayerProfile>> futures = new ArrayList<>();
+
+            // Fire concurrent requests for all remaining servers via virtual threads
+            List<PlayerProfile[]> slots = new ArrayList<>();
+            List<Thread> threads = new ArrayList<>();
             for (String method : authServers.getKeys()) {
                 if (!method.equals(preferredMethod)) {
-                    String url1 = authServers.get(method) + "session/minecraft/hasJoined?username=" + username + "&serverId=" + serverID;
-                    if (Config.getBoolean("authentication.yggdrasil.verify-ip")) url1 += "&ip=" + ip;
-                    futures.add(authenticateVia(username, method, url1));
+                    String url1 = buildAuthenticationUrl(authServers.get(method), username, serverID, ip);
+                    PlayerProfile[] slot = {null};
+                    slots.add(slot);
+                    threads.add(Thread.ofVirtual().start(() -> slot[0] = authenticateVia(username, method, url1)));
                 }
             }
 
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                    .completeOnTimeout(null, 10, TimeUnit.SECONDS)
-                    .join();
+            long deadlineMs = System.currentTimeMillis() + 10_000;
+            for (Thread t : threads) {
+                long remaining = deadlineMs - System.currentTimeMillis();
+                if (remaining > 0) t.join(Duration.ofMillis(remaining));
+            }
 
-            for (CompletableFuture<PlayerProfile> future : futures) {
-                if (future.isDone() && future.get() != null) {
-                    return future.get();
-                }
+            for (PlayerProfile[] slot : slots) {
+                if (slot[0] != null) return slot[0];
             }
             return null;
-        }catch (Exception e){
+        } catch (Exception e) {
             Logger.error("Failed to authenticate " + username + ": " + e.getMessage());
         }
         return null;
     }
 }
+

@@ -69,16 +69,17 @@ public class DatabaseHandler implements IDatabaseHandler {
 
     @Override
     public int createProfile(UUID uuid, String name) throws SQLException {
-        try (Connection connection = getConnection()) {
-            var st = connection.prepareStatement(
+        try (Connection connection = getConnection();
+             var st = connection.prepareStatement(
                     "INSERT INTO " + TABLE_PROFILES + " (uuid, name) VALUES (?, ?)",
-                    Statement.RETURN_GENERATED_KEYS);
+                    Statement.RETURN_GENERATED_KEYS)) {
             st.setString(1, uuid.toString());
             st.setString(2, name);
             st.execute();
-            var rs = st.getGeneratedKeys();
-            if (rs.next()) {
-                return rs.getInt(1);
+            try (var rs = st.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
             }
             throw new SQLException("Failed to retrieve generated profile ID");
         }
@@ -131,32 +132,43 @@ public class DatabaseHandler implements IDatabaseHandler {
             try {
                 String resolvedName = resolveUniqueProfileName(connection, name);
 
-                var st = connection.prepareStatement(
+                try (var st = connection.prepareStatement(
                         "INSERT INTO " + TABLE_PROFILES + " (uuid, name) VALUES (?, ?)",
-                        Statement.RETURN_GENERATED_KEYS);
-                st.setString(1, loginUuid.toString());
-                st.setString(2, resolvedName);
-                st.execute();
-                var rs = st.getGeneratedKeys();
-                if (!rs.next()) {
-                    throw new SQLException("Failed to retrieve generated profile ID");
+                        Statement.RETURN_GENERATED_KEYS)) {
+                    st.setString(1, loginUuid.toString());
+                    st.setString(2, resolvedName);
+                    st.execute();
+                    try (var rs = st.getGeneratedKeys()) {
+                        if (!rs.next()) {
+                            throw new SQLException("Failed to retrieve generated profile ID");
+                        }
+                        int profileId = rs.getInt(1);
+
+                        try (var st2 = connection.prepareStatement(
+                                "INSERT INTO " + TABLE_LOGIN_PROFILE + " (auth_method, login_uuid, profile_id, original_profile_id) VALUES (?, ?, ?, ?) " +
+                                "ON DUPLICATE KEY UPDATE profile_id = ?, original_profile_id = original_profile_id")) {
+                            st2.setString(1, authMethod);
+                            st2.setString(2, loginUuid.toString());
+                            st2.setInt(3, profileId);
+                            st2.setInt(4, profileId);
+                            st2.setInt(5, profileId);
+                            st2.execute();
+                        }
+
+                        connection.commit();
+                        return new Profile(profileId, loginUuid, resolvedName);
+                    }
                 }
-                int profileId = rs.getInt(1);
-
-                var st2 = connection.prepareStatement(
-                        "INSERT INTO " + TABLE_LOGIN_PROFILE + " (auth_method, login_uuid, profile_id, original_profile_id) VALUES (?, ?, ?, ?) " +
-                        "ON DUPLICATE KEY UPDATE profile_id = ?, original_profile_id = original_profile_id");
-                st2.setString(1, authMethod);
-                st2.setString(2, loginUuid.toString());
-                st2.setInt(3, profileId);
-                st2.setInt(4, profileId);
-                st2.setInt(5, profileId);
-                st2.execute();
-
-                connection.commit();
-                return new Profile(profileId, loginUuid, resolvedName);
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 connection.rollback();
+                // Handle concurrent insert: if a duplicate key occurred, retry the lookup
+                // so concurrent logins for the same player converge to the same profile.
+                if (isDuplicateKeyException(e)) {
+                    Profile retry = getProfileByLogin(authMethod, loginUuid);
+                    if (retry != null) {
+                        return retry;
+                    }
+                }
                 throw e;
             } finally {
                 connection.setAutoCommit(true);
@@ -164,18 +176,29 @@ public class DatabaseHandler implements IDatabaseHandler {
         }
     }
 
+    /** Returns true if the given SQLException represents a unique/duplicate-key constraint violation. */
+    private static boolean isDuplicateKeyException(SQLException e) {
+        // MySQL error code 1062 = Duplicate entry; SQLState 23000 = integrity constraint violation
+        return e.getErrorCode() == 1062 || "23000".equals(e.getSQLState());
+    }
+
     private String resolveUniqueProfileName(Connection connection, String baseName) throws SQLException {
         String candidate = baseName;
-        while (true) {
-            var st = connection.prepareStatement(
-                    "SELECT 1 FROM " + TABLE_PROFILES + " WHERE name = ? LIMIT 1");
-            st.setString(1, candidate);
-            var rs = st.executeQuery();
-            if (!rs.next()) {
-                return candidate;
+        int maxAttempts = 4;
+        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+            try (var st = connection.prepareStatement(
+                    "SELECT 1 FROM " + TABLE_PROFILES + " WHERE name = ? LIMIT 1")) {
+                st.setString(1, candidate);
+                try (var rs = st.executeQuery()) {
+                    if (!rs.next()) {
+                        return candidate;
+                    }
+                }
             }
-            candidate = candidate + "_";
+            candidate = baseName + "_".repeat(attempt + 1);
         }
+        // Fallback: append a short UUID fragment to guarantee uniqueness
+        return baseName + "_" + UUID.randomUUID().toString().substring(0, 3);
     }
 
     @SneakyThrows

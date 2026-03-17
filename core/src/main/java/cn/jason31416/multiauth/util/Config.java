@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public class Config {
     @Getter
-    private static MapTree configTree;
+    private static volatile MapTree configTree;
 
     public static void init() {
         if(!MultiAuth.getInstance().getDataDirectory().exists()) MultiAuth.getInstance().getDataDirectory().mkdirs();
