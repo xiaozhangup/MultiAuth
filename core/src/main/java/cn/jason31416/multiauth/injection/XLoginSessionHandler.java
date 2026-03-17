@@ -4,10 +4,8 @@ This file contains partial code from the MultiLogin project
 
 package cn.jason31416.multiauth.injection;
 
-import cn.jason31416.multiauth.MultiAuth;
 import cn.jason31416.multiauth.api.Profile;
 import cn.jason31416.multiauth.handler.DatabaseHandler;
-import cn.jason31416.multiauth.handler.LoginSession;
 import cn.jason31416.multiauth.handler.Whitelist;
 import cn.jason31416.multiauth.handler.YggdrasilAuthenticator;
 import cn.jason31416.multiauth.injection.accessor.Accessor;
@@ -240,7 +238,7 @@ public class XLoginSessionHandler {
                 String serverId = EncryptionUtils.generateServerId(decryptedSharedSecret, serverKeyPair.getPublic());
                 String playerIp = ((InetSocketAddress) this.mcConnection.getRemoteAddress()).getHostString();
 
-                MultiAuth.getInstance().getProxy().getScheduler().buildTask(MultiAuth.getInstance(), () -> {
+                Thread.ofVirtual().name("multiauth-yggdrasil-auth-" + username).start(() -> {
                     PlayerProfile playerProfile;
                     try {
                         playerProfile = YggdrasilAuthenticator.authenticate(username, serverId, playerIp);
@@ -332,7 +330,7 @@ public class XLoginSessionHandler {
                         }
                         mcConnection.close(true);
                     }
-                }).schedule();
+                });
             } catch (GeneralSecurityException var9) {
                 Logger.error("Unable to enable encryption. " + var9.getMessage());
                 this.mcConnection.close(true);
