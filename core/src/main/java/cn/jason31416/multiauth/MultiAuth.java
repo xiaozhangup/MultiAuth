@@ -29,7 +29,7 @@ import java.nio.file.Path;
 @Plugin(
         id = "multiauth",
         name = "MultiAuth",
-        version = "2.2.1",
+        version = "2.2.2",
         authors = {"Jason31416", "oneLiLi"},
         dependencies = {
                 @Dependency(id = "tab", optional = true)
