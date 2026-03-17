@@ -79,7 +79,21 @@ public class EventListener {
                 event.setGameProfile(new GameProfile(authenticatedUuid, yggdrasilName, event.getOriginalProfile().getProperties()));
                 return;
             }
-            event.setGameProfile(new GameProfile(profile.uuid, profile.name, event.getOriginalProfile().getProperties()));
+
+            String finalProfileName = profile.name;
+            try {
+                Integer originalProfileId = DatabaseHandler.getInstance().getOriginalProfileId(authMethod, authenticatedUuid);
+                if (originalProfileId != null
+                        && originalProfileId == profile.id
+                        && !yggdrasilName.equals(profile.name)) {
+                    DatabaseHandler.getInstance().setProfileName(profile.id, yggdrasilName);
+                    finalProfileName = yggdrasilName;
+                }
+            } catch (Exception e) {
+                Logger.warn("Failed to sync profile name for " + yggdrasilName + " (" + authMethod + "): " + e.getMessage());
+            }
+
+            event.setGameProfile(new GameProfile(profile.uuid, finalProfileName, event.getOriginalProfile().getProperties()));
             return;
         }
 

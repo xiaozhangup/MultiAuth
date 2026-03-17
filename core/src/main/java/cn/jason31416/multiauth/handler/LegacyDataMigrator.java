@@ -53,7 +53,7 @@ public class LegacyDataMigrator {
                 try {
                     Profile profile = DatabaseHandler.getInstance().getOrCreateProfileForLogin(authMethod, loginUuid, username);
                     DatabaseHandler.getInstance().setPreferred(username, authMethod);
-                    DatabaseHandler.getInstance().setLoginProfile(authMethod, loginUuid, profile.id);
+                    DatabaseHandler.getInstance().setLoginProfileWithOriginalId(authMethod, loginUuid, profile.id, profile.id);
                     result.migratedRows++;
                 } catch (Exception e) {
                     result.failedRows++;

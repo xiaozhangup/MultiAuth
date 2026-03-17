@@ -12,7 +12,6 @@ import javax.annotation.Nullable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 import java.util.UUID;
 
 public class DatabaseHandler implements IDatabaseHandler {
@@ -39,7 +38,7 @@ public class DatabaseHandler implements IDatabaseHandler {
         try (Connection connection = getConnection()) {
             connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_AUTH_METHODS + " (username VARCHAR(255) PRIMARY KEY, preferred VARCHAR(255))").execute();
             connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_PROFILES + " (id INT NOT NULL AUTO_INCREMENT, uuid VARCHAR(36) NOT NULL UNIQUE, name VARCHAR(255) NOT NULL, PRIMARY KEY (id))").execute();
-            connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_LOGIN_PROFILE + " (auth_method VARCHAR(255) NOT NULL, login_uuid VARCHAR(36) NOT NULL, profile_id INT NOT NULL, PRIMARY KEY (auth_method, login_uuid))").execute();
+            connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + TABLE_LOGIN_PROFILE + " (auth_method VARCHAR(255) NOT NULL, login_uuid VARCHAR(36) NOT NULL, profile_id INT NOT NULL, original_profile_id INT NOT NULL, PRIMARY KEY (auth_method, login_uuid))").execute();
         }
     }
 
@@ -145,12 +144,13 @@ public class DatabaseHandler implements IDatabaseHandler {
                 int profileId = rs.getInt(1);
 
                 var st2 = connection.prepareStatement(
-                        "INSERT INTO " + TABLE_LOGIN_PROFILE + " (auth_method, login_uuid, profile_id) VALUES (?, ?, ?) " +
-                        "ON DUPLICATE KEY UPDATE profile_id = ?");
+                        "INSERT INTO " + TABLE_LOGIN_PROFILE + " (auth_method, login_uuid, profile_id, original_profile_id) VALUES (?, ?, ?, ?) " +
+                        "ON DUPLICATE KEY UPDATE profile_id = ?, original_profile_id = original_profile_id");
                 st2.setString(1, authMethod);
                 st2.setString(2, loginUuid.toString());
                 st2.setInt(3, profileId);
                 st2.setInt(4, profileId);
+                st2.setInt(5, profileId);
                 st2.execute();
 
                 connection.commit();
@@ -179,16 +179,38 @@ public class DatabaseHandler implements IDatabaseHandler {
     }
 
     @SneakyThrows
-    @Override
-    public void setLoginProfile(String authMethod, UUID loginUuid, int profileId) {
+    @Nullable
+    public Integer getOriginalProfileId(String authMethod, UUID loginUuid) {
         try (Connection connection = getConnection()) {
             var st = connection.prepareStatement(
-                    "INSERT INTO " + TABLE_LOGIN_PROFILE + " (auth_method, login_uuid, profile_id) VALUES (?, ?, ?) " +
-                    "ON DUPLICATE KEY UPDATE profile_id = ?");
+                    "SELECT original_profile_id FROM " + TABLE_LOGIN_PROFILE + " WHERE auth_method = ? AND login_uuid = ?");
+            st.setString(1, authMethod);
+            st.setString(2, loginUuid.toString());
+            var rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("original_profile_id");
+            }
+            return null;
+        }
+    }
+
+    @SneakyThrows
+    @Override
+    public void setLoginProfile(String authMethod, UUID loginUuid, int profileId) {
+        setLoginProfileWithOriginalId(authMethod, loginUuid, profileId, profileId);
+    }
+
+    @SneakyThrows
+    public void setLoginProfileWithOriginalId(String authMethod, UUID loginUuid, int profileId, int originalProfileId) {
+        try (Connection connection = getConnection()) {
+            var st = connection.prepareStatement(
+                    "INSERT INTO " + TABLE_LOGIN_PROFILE + " (auth_method, login_uuid, profile_id, original_profile_id) VALUES (?, ?, ?, ?) " +
+                    "ON DUPLICATE KEY UPDATE profile_id = ?, original_profile_id = original_profile_id");
             st.setString(1, authMethod);
             st.setString(2, loginUuid.toString());
             st.setInt(3, profileId);
-            st.setInt(4, profileId);
+            st.setInt(4, originalProfileId);
+            st.setInt(5, profileId);
             st.execute();
         }
     }

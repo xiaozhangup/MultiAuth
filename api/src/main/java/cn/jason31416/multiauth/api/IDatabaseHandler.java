@@ -2,7 +2,6 @@ package cn.jason31416.multiauth.api;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.UUID;
 
 public interface IDatabaseHandler {
