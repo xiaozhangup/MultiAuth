@@ -160,6 +160,28 @@ public class DatabaseHandler implements IDatabaseHandler {
 
     @SneakyThrows
     @Override
+    @Nullable
+    public Profile getProfileByName(String name) {
+        try (
+                Connection connection = getConnection();
+                var st = connection.prepareStatement("SELECT id, uuid, name FROM %s WHERE name = ? LIMIT 1".formatted(TABLE_PROFILES))
+        ) {
+            st.setString(1, name);
+            try (var rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return new Profile(
+                            rs.getInt("id"),
+                            UUID.fromString(rs.getString("uuid")),
+                            rs.getString("name")
+                    );
+                }
+                return null;
+            }
+        }
+    }
+
+    @SneakyThrows
+    @Override
     public Profile getOrCreateProfileForLogin(String authMethod, UUID loginUuid, String name) {
         Profile existing = getProfileByLogin(authMethod, loginUuid);
         if (existing != null) {
