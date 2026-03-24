@@ -66,3 +66,13 @@ command:
     started: "Started migrating data from table multilogin_user_data_v3..."
     finished: "Migration finished: total %total% | migrated %migrated% | skipped %skipped% | failed %failed%"
     failed: "Migration failed: error: %error%"
+
+  query:
+    invalid-format: "Incorrect format! Use /multiauth query <player|list>"
+    player-not-online: "Player %player% is not online!"
+    result: "Player %player% | Profile #%id% | UUID: %uuid% | Auth: %auth_method%"
+    result-no-profile: "Player %player% | UUID: %uuid% | Auth: %auth_method% | Profile: not found"
+    list:
+      header: "Online players (%count%):"
+      entry: "%player% | UUID: %uuid% | Auth: %auth_method%"
+      empty: "No online players found."
