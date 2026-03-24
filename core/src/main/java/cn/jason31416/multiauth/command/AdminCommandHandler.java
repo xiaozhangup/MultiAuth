@@ -47,6 +47,9 @@ public class AdminCommandHandler implements SimpleCommand {
             case "query" -> {
                 handleQueryCommand(invocation);
             }
+            case "list" -> {
+                handleListCommand(invocation);
+            }
             case "" -> {
                 invocation.source().sendMessage(new Message("<green>Running <aqua><bold>MultiAuth v2</bold></aqua> by Jason31416!").toComponent());
             }
@@ -274,70 +277,57 @@ public class AdminCommandHandler implements SimpleCommand {
             invocation.source().sendMessage(Message.getMessage("command.query.invalid-format").toComponent());
             return;
         }
-        String sub = invocation.arguments()[1];
-        if ("list".equals(sub)) {
-            // /multiauth query list
-            var sessions = LoginSession.getSessionMap();
-            if (sessions.isEmpty()) {
-                invocation.source().sendMessage(Message.getMessage("command.query.list.empty").toComponent());
-                return;
-            }
-            invocation.source().sendMessage(Message.getMessage("command.query.list.header")
-                    .add("count", String.valueOf(sessions.size()))
+        String playerName = invocation.arguments()[1];
+        // First try to get profile from the database by name
+        Profile profile = DatabaseHandler.getInstance().getProfileByName(playerName);
+        String authMethod = DatabaseHandler.getInstance().getPreferredMethod(playerName);
+        // If the player is currently online, prefer the live session data for auth method
+        LoginSession session = LoginSession.getSessionMap().get(playerName);
+        if (session != null && session.getAuthMethod() != null) {
+            authMethod = session.getAuthMethod();
+        }
+        if (profile != null) {
+            invocation.source().sendMessage(Message.getMessage("command.query.result")
+                    .add("player", playerName)
+                    .add("id", String.valueOf(profile.id))
+                    .add("uuid", profile.uuid.toString())
+                    .add("auth_method", authMethod != null ? authMethod : "unknown")
                     .toComponent());
-            for (LoginSession session : sessions.values()) {
-                String authMethod = session.getAuthMethod() != null ? session.getAuthMethod() : "unknown";
-                invocation.source().sendMessage(Message.getMessage("command.query.list.entry")
-                        .add("player", session.getUsername())
-                        .add("uuid", session.getUuid().toString())
-                        .add("auth_method", authMethod)
-                        .toComponent());
-            }
         } else {
-            // /multiauth query <player>
-            String playerName = sub;
-            LoginSession session = LoginSession.getSessionMap().get(playerName);
-            if (session == null) {
-                invocation.source().sendMessage(Message.getMessage("command.query.player-not-online")
-                        .add("player", playerName)
-                        .toComponent());
-                return;
-            }
-            String authMethod = session.getAuthMethod();
-            Profile profile = null;
-            if (authMethod != null) {
-                profile = DatabaseHandler.getInstance().getProfileByLogin(authMethod, session.getUuid());
-            }
-            if (profile != null) {
-                invocation.source().sendMessage(Message.getMessage("command.query.result")
-                        .add("player", playerName)
-                        .add("id", String.valueOf(profile.id))
-                        .add("uuid", profile.uuid.toString())
-                        .add("auth_method", authMethod)
-                        .toComponent());
-            } else {
-                invocation.source().sendMessage(Message.getMessage("command.query.result-no-profile")
-                        .add("player", playerName)
-                        .add("uuid", session.getUuid().toString())
-                        .add("auth_method", authMethod != null ? authMethod : "unknown")
-                        .toComponent());
-            }
+            invocation.source().sendMessage(Message.getMessage("command.query.not-found")
+                    .add("player", playerName)
+                    .toComponent());
+        }
+    }
+
+    private void handleListCommand(SimpleCommand.Invocation invocation) {
+        var sessions = LoginSession.getSessionMap();
+        if (sessions.isEmpty()) {
+            invocation.source().sendMessage(Message.getMessage("command.list.empty").toComponent());
+            return;
+        }
+        invocation.source().sendMessage(Message.getMessage("command.list.header")
+                .add("count", String.valueOf(sessions.size()))
+                .toComponent());
+        for (LoginSession session : sessions.values()) {
+            String authMethod = session.getAuthMethod() != null ? session.getAuthMethod() : "unknown";
+            invocation.source().sendMessage(Message.getMessage("command.list.entry")
+                    .add("player", session.getUsername())
+                    .add("uuid", session.getUuid().toString())
+                    .add("auth_method", authMethod)
+                    .toComponent());
         }
     }
 
     @Override
     public List<String> suggest(final @Nonnull Invocation invocation) {
         if(invocation.arguments().length<=1)
-            return List.of("reload", "profile", "whitelist", "query");
+            return List.of("reload", "profile", "whitelist", "query", "list");
         else if(invocation.arguments().length == 2){
             return switch (invocation.arguments()[0]){
                 case "profile" -> List.of("create", "set", "rename", "info");
                 case "whitelist" -> List.of("add", "remove", "list");
-                case "query" -> {
-                    List<String> names = new java.util.ArrayList<>(LoginSession.getSessionMap().keySet());
-                    names.add(0, "list");
-                    yield names;
-                }
+                case "query" -> new java.util.ArrayList<>(LoginSession.getSessionMap().keySet());
                 default -> List.of();
             };
         } else if (invocation.arguments().length == 3) {

@@ -68,11 +68,11 @@ command:
     failed: "迁移失败: 错误: %error%"
 
   query:
-    invalid-format: "错误的格式! 请使用 /multiauth query <玩家|list>"
-    player-not-online: "玩家 %player% 不在线!"
+    invalid-format: "错误的格式! 请使用 /multiauth query <玩家>"
+    not-found: "找不到玩家 %player% 的档案!"
     result: "玩家 %player% | 档案 #%id% | UUID: %uuid% | 登录方式: %auth_method%"
-    result-no-profile: "玩家 %player% | UUID: %uuid% | 登录方式: %auth_method% | 档案: 未找到"
-    list:
-      header: "在线玩家 (共 %count% 人):"
-      entry: "%player% | UUID: %uuid% | 登录方式: %auth_method%"
-      empty: "当前没有在线玩家"
+
+  list:
+    header: "在线玩家 (共 %count% 人):"
+    entry: "%player% | UUID: %uuid% | 登录方式: %auth_method%"
+    empty: "当前没有在线玩家"

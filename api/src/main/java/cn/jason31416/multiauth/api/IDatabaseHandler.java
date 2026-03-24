@@ -29,6 +29,11 @@ public interface IDatabaseHandler {
     Profile getProfileByLogin(String authMethod, UUID loginUuid);
 
     /**
+     * Returns the profile with the given display name, or {@code null} if not found.
+     */
+    Profile getProfileByName(String name);
+
+    /**
      * Returns the profile for the given login, creating a new one if none exists.
      * When a profile is created automatically its UUID is set to {@code loginUuid}
      * and its name is set to {@code name}.

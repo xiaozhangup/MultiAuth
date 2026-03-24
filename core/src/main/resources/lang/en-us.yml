@@ -68,11 +68,11 @@ command:
     failed: "Migration failed: error: %error%"
 
   query:
-    invalid-format: "Incorrect format! Use /multiauth query <player|list>"
-    player-not-online: "Player %player% is not online!"
+    invalid-format: "Incorrect format! Use /multiauth query <player>"
+    not-found: "No profile found for player %player%!"
     result: "Player %player% | Profile #%id% | UUID: %uuid% | Auth: %auth_method%"
-    result-no-profile: "Player %player% | UUID: %uuid% | Auth: %auth_method% | Profile: not found"
-    list:
-      header: "Online players (%count%):"
-      entry: "%player% | UUID: %uuid% | Auth: %auth_method%"
-      empty: "No online players found."
+
+  list:
+    header: "Online players (%count%):"
+    entry: "%player% | UUID: %uuid% | Auth: %auth_method%"
+    empty: "No online players found."
