@@ -255,7 +255,7 @@ public class DatabaseHandler implements IDatabaseHandler {
                 return candidate;
             }
         }
-        return baseName + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+        return baseName + UUID.randomUUID().toString().replace("-", "").substring(0, 3);
     }
 
     private boolean profileNameExists(Connection connection, String name) throws SQLException {
@@ -270,17 +270,10 @@ public class DatabaseHandler implements IDatabaseHandler {
     @SneakyThrows
     public String syncProfileName(int profileId, String storedName, String yggdrasilName) {
         try (Connection connection = getConnection()) {
-            // A stored name is considered collision-resolved when it equals yggdrasilName + digits
-            // AND the base yggdrasilName still belongs to another profile in the database.
-            // Both conditions are required: the pattern alone is insufficient because the player
-            // may have actually changed their name from e.g. "user123" to "user".
-            if (storedName.startsWith(yggdrasilName)) {
-                String suffix = storedName.substring(yggdrasilName.length());
-                if (suffix.matches("\\d+") && profileNameExists(connection, yggdrasilName)) {
-                    return storedName;
-                }
+            if (storedName.startsWith(yggdrasilName) && profileNameExists(connection, yggdrasilName)) {
+                return storedName;
             }
-            // Real name change: resolve a unique name for the new yggdrasil name and update.
+
             String newName = resolveUniqueProfileName(connection, yggdrasilName);
             try (var st = connection.prepareStatement("UPDATE %s SET name = ? WHERE id = ?".formatted(TABLE_PROFILES))) {
                 st.setString(1, newName);
