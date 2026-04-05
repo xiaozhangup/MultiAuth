@@ -5,7 +5,7 @@ plugins {
 
 allprojects {
     group = "cn.jason31416"
-    version = "2.2.2"
+    version = "2.2.3"
 }
 
 subprojects {
