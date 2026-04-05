@@ -246,20 +246,42 @@ public class DatabaseHandler implements IDatabaseHandler {
     }
 
     private String resolveUniqueProfileName(Connection connection, String baseName) throws SQLException {
-        String candidate = baseName;
-        int maxAttempts = 4;
-        for (int attempt = 0; attempt < maxAttempts; attempt++) {
-            try (var st = connection.prepareStatement("SELECT 1 FROM %s WHERE name = ? LIMIT 1".formatted(TABLE_PROFILES))) {
-                st.setString(1, candidate);
-                try (var rs = st.executeQuery()) {
-                    if (!rs.next()) {
-                        return candidate;
-                    }
-                }
-            }
-            candidate = baseName + "_".repeat(attempt + 1);
+        if (!profileNameExists(connection, baseName)) {
+            return baseName;
         }
-        return baseName + "_" + UUID.randomUUID().toString().substring(0, 3);
+        for (int i = 1; i <= 100; i++) {
+            String candidate = baseName + i;
+            if (!profileNameExists(connection, candidate)) {
+                return candidate;
+            }
+        }
+        return baseName + UUID.randomUUID().toString().replace("-", "").substring(0, 3);
+    }
+
+    private boolean profileNameExists(Connection connection, String name) throws SQLException {
+        try (var st = connection.prepareStatement("SELECT 1 FROM %s WHERE name = ? LIMIT 1".formatted(TABLE_PROFILES))) {
+            st.setString(1, name);
+            try (var rs = st.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    @SneakyThrows
+    public String syncProfileName(int profileId, String storedName, String yggdrasilName) {
+        try (Connection connection = getConnection()) {
+            if (storedName.startsWith(yggdrasilName) && profileNameExists(connection, yggdrasilName)) {
+                return storedName;
+            }
+
+            String newName = resolveUniqueProfileName(connection, yggdrasilName);
+            try (var st = connection.prepareStatement("UPDATE %s SET name = ? WHERE id = ?".formatted(TABLE_PROFILES))) {
+                st.setString(1, newName);
+                st.setInt(2, profileId);
+                st.execute();
+            }
+            return newName;
+        }
     }
 
     @SneakyThrows
