@@ -246,20 +246,49 @@ public class DatabaseHandler implements IDatabaseHandler {
     }
 
     private String resolveUniqueProfileName(Connection connection, String baseName) throws SQLException {
-        String candidate = baseName;
-        int maxAttempts = 4;
-        for (int attempt = 0; attempt < maxAttempts; attempt++) {
-            try (var st = connection.prepareStatement("SELECT 1 FROM %s WHERE name = ? LIMIT 1".formatted(TABLE_PROFILES))) {
-                st.setString(1, candidate);
-                try (var rs = st.executeQuery()) {
-                    if (!rs.next()) {
-                        return candidate;
-                    }
+        if (!profileNameExists(connection, baseName)) {
+            return baseName;
+        }
+        for (int i = 1; i <= 100; i++) {
+            String candidate = baseName + i;
+            if (!profileNameExists(connection, candidate)) {
+                return candidate;
+            }
+        }
+        return baseName + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+    }
+
+    private boolean profileNameExists(Connection connection, String name) throws SQLException {
+        try (var st = connection.prepareStatement("SELECT 1 FROM %s WHERE name = ? LIMIT 1".formatted(TABLE_PROFILES))) {
+            st.setString(1, name);
+            try (var rs = st.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    @SneakyThrows
+    public String syncProfileName(int profileId, String storedName, String yggdrasilName) {
+        try (Connection connection = getConnection()) {
+            // A stored name is considered collision-resolved when it equals yggdrasilName + digits
+            // AND the base yggdrasilName still belongs to another profile in the database.
+            // Both conditions are required: the pattern alone is insufficient because the player
+            // may have actually changed their name from e.g. "user123" to "user".
+            if (storedName.startsWith(yggdrasilName)) {
+                String suffix = storedName.substring(yggdrasilName.length());
+                if (suffix.matches("\\d+") && profileNameExists(connection, yggdrasilName)) {
+                    return storedName;
                 }
             }
-            candidate = baseName + "_".repeat(attempt + 1);
+            // Real name change: resolve a unique name for the new yggdrasil name and update.
+            String newName = resolveUniqueProfileName(connection, yggdrasilName);
+            try (var st = connection.prepareStatement("UPDATE %s SET name = ? WHERE id = ?".formatted(TABLE_PROFILES))) {
+                st.setString(1, newName);
+                st.setInt(2, profileId);
+                st.execute();
+            }
+            return newName;
         }
-        return baseName + "_" + UUID.randomUUID().toString().substring(0, 3);
     }
 
     @SneakyThrows

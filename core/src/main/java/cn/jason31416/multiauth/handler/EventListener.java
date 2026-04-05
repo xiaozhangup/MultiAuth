@@ -86,8 +86,7 @@ public class EventListener {
                 if (originalProfileId != null
                         && originalProfileId == profile.id
                         && !yggdrasilName.equals(profile.name)) {
-                    DatabaseHandler.getInstance().setProfileName(profile.id, yggdrasilName);
-                    finalProfileName = yggdrasilName;
+                    finalProfileName = DatabaseHandler.getInstance().syncProfileName(profile.id, profile.name, yggdrasilName);
                 }
             } catch (Exception e) {
                 Logger.warn("Failed to sync profile name for " + yggdrasilName + " (" + authMethod + "): " + e.getMessage());
