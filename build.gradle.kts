@@ -1,6 +1,6 @@
 plugins {
     base
-    kotlin("jvm") version "2.1.20" apply false
+    kotlin("jvm") version "2.3.20" apply false
 }
 
 allprojects {
@@ -13,8 +13,9 @@ subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     configure<JavaPluginExtension> {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        toolchain.languageVersion.set(JavaLanguageVersion.of(25))
+        sourceCompatibility = JavaVersion.VERSION_25
+        targetCompatibility = JavaVersion.VERSION_25
     }
 
     tasks.withType<JavaCompile>().configureEach {

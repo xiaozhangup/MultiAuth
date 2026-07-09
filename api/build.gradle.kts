@@ -3,14 +3,15 @@ plugins {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
 }
 
 dependencies {
-    compileOnly("org.projectlombok:lombok:1.18.38")
-    annotationProcessor("org.projectlombok:lombok:1.18.38")
-    compileOnly(files("../lib/velocity-3.4.0-SNAPSHOT-523.jar"))
+    compileOnly("org.projectlombok:lombok:1.18.46")
+    annotationProcessor("org.projectlombok:lombok:1.18.46")
+    compileOnly("com.velocitypowered:velocity-api:3.5.0-SNAPSHOT")
 }
 
 tasks.jar {
