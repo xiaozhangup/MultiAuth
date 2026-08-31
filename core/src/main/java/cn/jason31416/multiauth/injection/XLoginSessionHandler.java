@@ -6,6 +6,7 @@ package cn.jason31416.multiauth.injection;
 
 import cn.jason31416.multiauth.api.Profile;
 import cn.jason31416.multiauth.handler.DatabaseHandler;
+import cn.jason31416.multiauth.handler.MineSkinConverter;
 import cn.jason31416.multiauth.handler.Whitelist;
 import cn.jason31416.multiauth.handler.YggdrasilAuthenticator;
 import cn.jason31416.multiauth.injection.accessor.Accessor;
@@ -305,9 +306,11 @@ public class XLoginSessionHandler {
                                     }
                                 }
                             }
+                            props = MineSkinConverter.convert(authMethod, props);
                             // Capture as effectively-final for lambda
                             final UUID finalUuid = yggdrasilUuid;
                             final String finalName = playerProfile.name;
+                            final List<GameProfile.Property> finalProps = props;
                             mcConnection.getChannel().eventLoop().submit(() -> {
                                 try {
                                     this.mcConnection.setActiveSessionHandler(StateRegistry.LOGIN,
@@ -315,7 +318,7 @@ public class XLoginSessionHandler {
                                                     inbound, new GameProfile(
                                                             finalUuid,
                                                             finalName,
-                                                            props)
+                                                            finalProps)
                                                     , true)
                                     );
                                 } catch (Throwable e) {

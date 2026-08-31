@@ -31,6 +31,11 @@ authentication:
     # "useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
     parameters: "useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
 
+skin:
+  mineskin:
+    # MineSkin v2 API key. Leave empty to keep third-party Yggdrasil texture properties unchanged.
+    api-key: ""
+
 prefix: # Used for placeholder/TAB integration. Use %multiauth-auth-tag% in TAB to display.
   mojang: "<green>Online"
   littleskin: "<yellow>Littleskin"

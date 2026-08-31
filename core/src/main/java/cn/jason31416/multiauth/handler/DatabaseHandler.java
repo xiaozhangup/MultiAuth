@@ -21,6 +21,7 @@ public class DatabaseHandler implements IDatabaseHandler {
     public static final String TABLE_AUTH_METHODS = "multiauth_authmethods";
     public static final String TABLE_PROFILES = "multiauth_profiles";
     public static final String TABLE_LOGIN_PROFILE = "multiauth_login_profile";
+    public static final String TABLE_SKIN_CACHE = "multiauth_skin_cache";
 
     public HikariDataSource dataSource;
 
@@ -61,6 +62,13 @@ public class DatabaseHandler implements IDatabaseHandler {
                         original_profile_id INT NOT NULL,
                         PRIMARY KEY (auth_method, login_uuid)
                     )""".formatted(TABLE_LOGIN_PROFILE));
+
+            st.execute("""
+                    CREATE TABLE IF NOT EXISTS %s (
+                        source_hash CHAR(64) PRIMARY KEY,
+                        value TEXT NOT NULL,
+                        signature TEXT NOT NULL
+                    )""".formatted(TABLE_SKIN_CACHE));
         }
     }
 
