@@ -11,7 +11,7 @@ repositories {
 dependencies {
     compileOnly("org.projectlombok:lombok:1.18.46")
     annotationProcessor("org.projectlombok:lombok:1.18.46")
-    compileOnly("com.velocitypowered:velocity-api:4.1.1-SNAPSHOT")
+    compileOnly("com.velocitypowered:velocity-api:4.2.1-SNAPSHOT")
 }
 
 tasks.jar {

@@ -16,9 +16,9 @@ repositories {
 dependencies {
     implementation(project(":api"))
 
-    compileOnly("com.velocitypowered:velocity-api:4.1.1-SNAPSHOT")
-    compileOnly(files("../lib/velocity-4.1.1-24.jar"))
-    annotationProcessor("com.velocitypowered:velocity-api:4.1.1-SNAPSHOT")
+    compileOnly("com.velocitypowered:velocity-api:4.2.1-SNAPSHOT")
+    compileOnly(files("../lib/velocity-4.2.1-SNAPSHOT-36.jar"))
+    annotationProcessor("com.velocitypowered:velocity-api:4.2.1-SNAPSHOT")
 
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("mysql:mysql-connector-java:8.0.23")
